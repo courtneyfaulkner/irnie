@@ -1,9 +1,9 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
-Bundle-Name: BIRT ODA-Hibernate Driver
-Bundle-SymbolicName: org.eclipse.birt.report.data.oda.hibernate;singleton:=true
+Bundle-Name: BIRT ODA-JPA Driver
+Bundle-SymbolicName: org.eclipse.birt.report.data.oda.jpa;singleton:=true
 Bundle-Version: 2.0.0
-Bundle-Activator: org.eclipse.birt.report.data.oda.hibernate.Activator
+Bundle-Activator: org.eclipse.birt.report.data.oda.jpa.Activator
 Bundle-Localization: plugin
 Require-Bundle: org.eclipse.core.runtime,
  org.eclipse.datatools.connectivity.oda,
