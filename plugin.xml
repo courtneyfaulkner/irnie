@@ -6,27 +6,27 @@
          point="org.eclipse.datatools.connectivity.oda.dataSource">
       <dataSource
             odaVersion="3.0"
-            defaultDisplayName="Hibernate Data Source"
-            driverClass="org.eclipse.birt.report.data.oda.hibernate.HibernateDriver"
-            id="org.eclipse.birt.report.data.oda.hibernate"
+            defaultDisplayName="JPA Data Source"
+            driverClass="org.eclipse.birt.report.data.oda.jpa.JPADriver"
+            id="org.eclipse.birt.report.data.oda.jpa"
             setThreadContextClassLoader="true">
          <properties>
             <property
                   type="string"
-                  defaultDisplayName="Hibernate Configuration File"
+                  defaultDisplayName="JPA Configuration File"
                   canInherit="true"
-                  name="HIBCONFIG"/>
+                  name="JPACONFIG"/>
             <property
                   type="string"
-                  defaultDisplayName="Hibernate Mapping Directory"
+                  defaultDisplayName="JPA Mapping Directory"
                   canInherit="true"
                   name="MAPDIR"/>
          </properties>
                   
       </dataSource>            
        <dataSet
-            defaultDisplayName="Hibernate Data Set"
-            id="org.eclipse.birt.report.data.oda.hibernate.dataSet">   
+            defaultDisplayName="JPA Data Set"
+            id="org.eclipse.birt.report.data.oda.jpa.dataSet">   
                    
             <dataTypeMapping
                   nativeDataType="BIT"
