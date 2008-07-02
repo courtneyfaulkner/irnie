@@ -113,6 +113,14 @@ Export-Package: antlr,
  org.hibernate.type,
  org.hibernate.usertype,
  org.hibernate.util
+ javax.persistence.EntityManager;
+ javax.persistence.EntityManagerFactory;
+ javax.persistence.Persistence;
+ javax.persistence.PersistenceContext;
+ javax.persistence.PersistenceException;
+ javax.persistence.EntityNotFoundException;
+ javax.persistence.EntityExistException;
+
 Bundle-ClassPath: .,
  lib/ant-antlr-1.6.5.jar,
  lib/antlr-2.7.6rc1.jar,
