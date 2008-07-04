@@ -8,7 +8,7 @@
  * Contributors:
  *  Actuate Corporation  - initial API and implementation
  *******************************************************************************/
-package org.eclipse.birt.report.data.oda.hibernate;
+package org.eclipse.birt.report.data.oda.jpa;
 
 
 import java.util.MissingResourceException;
