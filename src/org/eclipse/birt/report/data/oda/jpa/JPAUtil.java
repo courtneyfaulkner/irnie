@@ -1,6 +1,5 @@
 package org.eclipse.birt.report.data.oda.jpa;
 
-
 import java.io.*;
 import java.net.URL;
 import java.net.URLClassLoader;
@@ -55,7 +54,8 @@ public class JPAUtil {
 
 	public static final ThreadLocal session = new ThreadLocal();
 
-	private static synchronized void initEntityManagerFactory( String jpafile, String mapdir) throws PersistenceException {
+	private static synchronized void initEntityManagerFactory( String jpafile, String mapdir) 
+		throws PersistenceException {
 		ClassLoader cl1;
 		
 		if( emf == null){
@@ -134,7 +134,8 @@ public class JPAUtil {
 		return( false );
 	}
 
-	public static synchronized void buildConfig(String jpafile, String mapdir, Configuration cfg ) throws PersistenceException, IOException, Exception {
+	public static synchronized void buildConfig(String jpafile, String mapdir, Configuration cfg )
+		 throws PersistenceException, IOException, Exception {
 		//Bundle hibbundle = Platform.getBundle( "org.eclipse.birt.report.data.oda.hibernate" );
 		Bundle jpabundle = Platform.getBundle( "org.eclipse.birt.report.data.oda.jpa" );
 		
