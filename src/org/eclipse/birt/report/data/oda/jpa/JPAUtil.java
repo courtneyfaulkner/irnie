@@ -43,8 +43,8 @@ public class JPAUtil {
 	private static EntityManagerFactory emf=null;
 	//private static Object configuration=null;
 
-	private static String JPAConfigFile = "";
-	private static String JPAMapDirectory = "";
+	//private static String JPAConfigFile = "";
+	//private static String JPAMapDirectory = "";
 	private static ClassLoader oldloader=null;
 	private static ArrayList FileList = new ArrayList();
 	public static ArrayList URLList = new ArrayList();
@@ -54,8 +54,13 @@ public class JPAUtil {
 
 	public static final ThreadLocal session = new ThreadLocal();
 
+<<<<<<< .mine
+	private static synchronized void initEntityManagerFactory( String persistenceUnit) throws PersistenceException {
+
+=======
 	private static synchronized void initEntityManagerFactory( String jpafile, String mapdir) 
 		throws PersistenceException {
+>>>>>>> .theirs
 		ClassLoader cl1;
 		
 		if( emf == null){
@@ -85,16 +90,17 @@ public class JPAUtil {
 				//cfg = new Configuration();
 				//Object oo = cls.newInstance();
 				//Configuration cfg = (Configuration)oo;
-				Configuration cfg = new Configuration();
-				buildConfig(jpafile,mapdir, cfg);	
+//				Configuration cfg = new Configuration();
+				//buildConfig(jpafile,mapdir, cfg);	
+				buildConfig(persistenceUnit);	
 
 
 				Class driverClass = testLoader.loadClass(cfg.getProperty("connection.driver_class"));
-				Driver driver = (Driver) driverClass.newInstance( );
-				WrappedDriver wd = new WrappedDriver( driver, cfg.getProperty("connection.driver_class"));
+				//Driver driver = (Driver) driverClass.newInstance( );
+				//WrappedDriver wd = new WrappedDriver( driver, cfg.getProperty("connection.driver_class"));
 
-				boolean foundDriver = false;
-				Enumeration drivers = DriverManager.getDrivers();
+				//boolean foundDriver = false;
+				/*Enumeration drivers = DriverManager.getDrivers();
 				while (drivers.hasMoreElements()) {
 					Driver nextDriver = (Driver)drivers.nextElement();
 					if (nextDriver.getClass() == wd.getClass()) {
@@ -107,15 +113,13 @@ public class JPAUtil {
 				if( !foundDriver ){
 
 					DriverManager.registerDriver( wd  ) ;
-				}
-				//sessionFactory = cfg.buildSessionFactory();
-				//configuration = cfg;
-				JPAMapDirectory = mapdir;
-				JPAConfigFile = jpafile;
+				}*/
 				
-
-
-
+				sessionFactory = cfg.buildSessionFactory();
+				//configuration = cfg;
+				//JPAMapDirectory = mapdir;
+				//JPAConfigFile = jpafile;
+				
 			}catch( Throwable e){
 				e.printStackTrace();
 				throw new PersistenceException( "No Session Factory Created "  +  e.getLocalizedMessage());
@@ -134,18 +138,24 @@ public class JPAUtil {
 		return( false );
 	}
 
+<<<<<<< .mine
+	public static synchronized void buildConfig(String persistenceUnit ) throws PersistenceException, IOException, Exception {
+
+=======
 	public static synchronized void buildConfig(String jpafile, String mapdir, Configuration cfg )
 		 throws PersistenceException, IOException, Exception {
+>>>>>>> .theirs
 		//Bundle hibbundle = Platform.getBundle( "org.eclipse.birt.report.data.oda.hibernate" );
 		Bundle jpabundle = Platform.getBundle( "org.eclipse.birt.report.data.oda.jpa" );
 		
-		File cfgFile = new File(jpafile);
+		/*File cfgFile = new File(jpafile);
 		File cfgDir = new File(mapdir);
 		if( cfgDir != null && cfgDir.length() > 0){
 			cfg.addDirectory(cfgDir);
 		}
-	
-		URL jpafiles = FileLocator.find(jpabundle, new Path(CommonConstant.JPA_CLASSES), null);
+	      */
+		
+		/*URL jpafiles = FileLocator.find(jpabundle, new Path(CommonConstant.JPA_CLASSES), null);
 		URL jpaURL = FileLocator.resolve(jpafiles);
 		File jpaDirectory = new File(jpaURL.getPath());
 		cfg.addDirectory(jpaDirectory);
@@ -155,28 +165,28 @@ public class JPAUtil {
 			//File configFile = new File(jpaURL.getPath() + "/persistence.xml");
 			File configFile = new File(jpaURL.getPath() + "/persistence.xml");
 			cfg.configure(configFile);
-		}
+		}*/
 		return;
 	}
 
-	public static void constructEntityManagerFactory( String jpafile, String mapdir) throws PersistenceException {
+	public static void constructEntityManagerFactory(String persistenceUnit) throws PersistenceException {
 
-		if( jpafile == null){
+		/*if( jpafile == null){
 			jpafile = "";
 		}
 		if( mapdir == null){
 			mapdir = "";
-		}    	
+		} */
 		if( emf == null){
-
-			initEntityManagerFactory( jpafile, mapdir);
+			//initEntityManagerFactory( jpafile, mapdir);
+			initEntityManagerFactory( persistenceUnit);
 			System.out.println("Initing Entity Manager Factory");
 			return;
 		}
 
-		if(  JPAMapDirectory.equalsIgnoreCase(mapdir) && JPAConfigFile.equalsIgnoreCase(jpafile)){
+		/*if(  JPAMapDirectory.equalsIgnoreCase(mapdir) && JPAConfigFile.equalsIgnoreCase(jpafile)){
 			return;
-		}
+		}*/
 		System.out.println( "Session Configuration Changed, rebuilding");
 		//Configuration changed need a rebuild.
 		//Note this is very expensive      
