@@ -1,31 +1,4 @@
-/*******************************************************************************
- *
- * blueMarine - open source photo workflow
- * =======================================
- *
- * Copyright (C) 2003-2008 by Fabrizio Giudici
- * Project home page: http://bluemarine.tidalwave.it
- *
- *******************************************************************************
- *
- * Licensed under the Apache License, Version 2.0 (the "License"); 
- * you may not use this file except in compliance with the License. 
- * You may obtain a copy of the License at 
- * 
- *     http://www.apache.org/licenses/LICENSE-2.0 
- * 
- * Unless required by applicable law or agreed to in writing, software 
- * distributed under the License is distributed on an "AS IS" BASIS, 
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. 
- * See the License for the specific language governing permissions and 
- * limitations under the License. 
- *
- *******************************************************************************
- *
- * $Id: ClassLoaderProxy.java 5502 2008-05-22 21:25:55Z fabriziogiudici $
- *
- ******************************************************************************/
-package it.tidalwave.bluemarine.persistence.impl;
+package org.eclipse.birt.report.data.oda.jpa;
 
 import java.io.File;
 import java.io.FileWriter;
@@ -54,20 +27,19 @@ import javax.xml.xpath.XPathConstants;
 import javax.xml.xpath.XPathExpression;
 import javax.xml.xpath.XPathExpressionException;
 import javax.xml.xpath.XPathFactory;
-import org.openide.filesystems.FileObject;
+
+//Estos son arcchivos de utileria de netbeans
+/*import org.openide.filesystems.FileObject;
 import org.openide.filesystems.FileSystem;
-import org.openide.filesystems.FileUtil;
+import org.openide.filesystems.FileUtil;*/
+
+//Librerias de Eclipse para manejo de archivos
+//import
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
-/*******************************************************************************
- *
- * @author  Fabrizio Giudici
- * @version $Id: ClassLoaderProxy.java 5502 2008-05-22 21:25:55Z fabriziogiudici $
- *
- ******************************************************************************/
 public class ClassLoaderProxy extends ClassLoader 
   {
     private static final String CLASS = ClassLoaderProxy.class.getName();
