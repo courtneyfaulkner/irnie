@@ -46,21 +46,27 @@ public class JPAUtil {
 	//private static String JPAConfigFile = "";
 	//private static String JPAMapDirectory = "";
 	private static ClassLoader oldloader=null;
-	private static ArrayList FileList = new ArrayList();
-	public static ArrayList URLList = new ArrayList();
+	private static ArrayList FileList = new ArrayList();//File's list 
+	public static ArrayList URLList = new ArrayList();//URL's list
     public static ClassLoader changeLoader;
     public static ClassLoader pluginLoader;
     
-
+    /*For manage easily share EntitiManagerFactory*/
 	public static final ThreadLocal session = new ThreadLocal();
 
-<<<<<<< .mine
-	private static synchronized void initEntityManagerFactory( String persistenceUnit) throws PersistenceException {
+//<<<<<<< .mine
+	//private static synchronized void initEntityManagerFactory( String persistenceUnit) throws PersistenceException {
 
-=======
-	private static synchronized void initEntityManagerFactory( String jpafile, String mapdir) 
+//=======
+    /*
+     * like a HIbernate Plug-in init the Entity Manager factory 
+     * isn't necessary get a name of peristence files because according to
+     * specification is located into directory named META-INF, but is necessary
+     * have like parameter the PersistenceUnit name  
+     **/
+	private static synchronized void initEntityManagerFactory(String persistenceUnit) 
 		throws PersistenceException {
->>>>>>> .theirs
+//>>>>>>> .theirs
 		ClassLoader cl1;
 		
 		if( emf == null){
@@ -77,9 +83,10 @@ public class JPAUtil {
 				//Class thwy2 = oldloader.loadClass("org.apache.commons.logging.LogFactory");
 				//refreshURLs();		
 				//ClassLoader changeLoader = new URLClassLoader( (URL [])URLList.toArray(new URL[0]),HibernateUtil.class.getClassLoader());
+				
 				ClassLoader testLoader = new URLClassLoader( (URL [])URLList.toArray(new URL[0]),pluginLoader);
 				//changeLoader = new URLClassLoader( (URL [])URLList.toArray(new URL[0]));
-
+				/*Set the context with testLoader ClassLoader(a URLClassLoader)*/
 				thread.setContextClassLoader(testLoader);
 				
 				/*In Hibernate Plug-in*/	
@@ -92,10 +99,13 @@ public class JPAUtil {
 				//Configuration cfg = (Configuration)oo;
 //				Configuration cfg = new Configuration();
 				//buildConfig(jpafile,mapdir, cfg);	
-				buildConfig(persistenceUnit);	
+				
+				//z/ buildConfig(persistenceUnit);	
 
 
-				Class driverClass = testLoader.loadClass(cfg.getProperty("connection.driver_class"));
+				//z/ Class driverClass = testLoader.loadClass(cfg.getProperty("connection.driver_class"));
+				
+				
 				//Driver driver = (Driver) driverClass.newInstance( );
 				//WrappedDriver wd = new WrappedDriver( driver, cfg.getProperty("connection.driver_class"));
 
@@ -115,7 +125,8 @@ public class JPAUtil {
 					DriverManager.registerDriver( wd  ) ;
 				}*/
 				
-				sessionFactory = cfg.buildSessionFactory();
+				//sessionFactory = cfg.buildSessionFactory();
+				emf = Persistence.createEntityManagerFactory(persistenceUnit);
 				//configuration = cfg;
 				//JPAMapDirectory = mapdir;
 				//JPAConfigFile = jpafile;
@@ -138,13 +149,13 @@ public class JPAUtil {
 		return( false );
 	}
 
-<<<<<<< .mine
+//<<<<<<< .mine
 	public static synchronized void buildConfig(String persistenceUnit ) throws PersistenceException, IOException, Exception {
 
-=======
-	public static synchronized void buildConfig(String jpafile, String mapdir, Configuration cfg )
+//=======
+	//public static synchronized void buildConfig(String jpafile, String mapdir, Configuration cfg )
 		 throws PersistenceException, IOException, Exception {
->>>>>>> .theirs
+//>>>>>>> .theirs
 		//Bundle hibbundle = Platform.getBundle( "org.eclipse.birt.report.data.oda.hibernate" );
 		Bundle jpabundle = Platform.getBundle( "org.eclipse.birt.report.data.oda.jpa" );
 		
@@ -190,7 +201,7 @@ public class JPAUtil {
 		System.out.println( "Session Configuration Changed, rebuilding");
 		//Configuration changed need a rebuild.
 		//Note this is very expensive      
-		synchronized(sessionFactory) {
+		synchronized(emf) {
 			EntityManager s = (EntityManager) session.get();
 			if (s != null) {
 				closeSession();
@@ -199,7 +210,8 @@ public class JPAUtil {
 				closeFactory();            	
 			}
 			emf = null;
-			initEntityManagerFactory( jpafile, mapdir);
+			//initEntityManagerFactory( jpafile, mapdir);
+			initEntityManagerFactory( persistenceUnit);
 		}
 	}
 
@@ -212,17 +224,22 @@ public class JPAUtil {
 			if( emf == null){
 				return null;
 			}
-			s = emf.openSession();
+			//s = emf.openSession();
+			s = emf.createEntityManager();
 			// Store it in the ThreadLocal variable
 			session.set(s);
 		}
 		return s;
 	}
+	
+	
 	public static void closeFactory(){
 		//more error checking needed
 		emf.close();
 		emf = null;
 	}
+	
+	
 	public static void closeSession() throws PersistenceException {
 		EntityManager s = (EntityManager) session.get();
 		if (s != null)
