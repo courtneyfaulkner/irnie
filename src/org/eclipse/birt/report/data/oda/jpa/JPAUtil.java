@@ -267,8 +267,6 @@ public class JPAUtil {
 	//Get type for given property
 	public static String  getJPAPropTypes(String className, String propName){
 
-		EntityManager session = JPAUtil.currentSession();
-		EntityManagerFactory emf = session.getEntityMangerFactory();
 		
         //In hibernate is like this:
 		/*org.hibernate.type.Type hibClassProps = sf.getClassMetadata(className).getPropertyType(propName);
@@ -276,7 +274,11 @@ public class JPAUtil {
 				
 		//In JPA es: ???
 		/* Code here, about get Class metadata  
-		return  ?; */
+		 *return  ?; */
+		 
+		 EntityManager session = JPAUtil.currentSession();
+		//EntityManagerFactory emf = session.getEntityMangerFactory();
+		
 
 	}    
 
@@ -284,7 +286,7 @@ public class JPAUtil {
 	public static Object  getJPAPropVal(Object instObj, String className, String propName){
 
 		EntityManager session = JPAUtil.currentSession();
-		EntityManagerFactory emf = session.getEntityManagerFactory();
+		//EntityManagerFactory emf = session.getEntityManagerFactory();
 		/* In hibernate is like this: 
 		SessionFactory sf = session.getSessionFactory();
 		Object jpaObj = sf.getClassMetadata(className).getPropertyValue(instObj, propName, EntityMode.POJO);
