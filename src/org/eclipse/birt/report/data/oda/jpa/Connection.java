@@ -18,14 +18,16 @@ public class Connection implements IConnection
 {
 
 	private boolean isOpen = false;
-	private String configfile = null;
-	private String mapdir = null;
+	//private String configfile = null;
+	//private String mapdir = null;
+	private String persistenceUnit = null;
 	
 	/*
 	 * (non-Javadoc)
 	 *
 	 * @see org.eclipse.birt.data.oda.IConnection#open(java.util.Properties)
 	 */
+	//public void open( Properties connProperties ) throws OdaException
 	public void open( Properties connProperties ) throws OdaException
 	{
 	
@@ -35,11 +37,13 @@ public class Connection implements IConnection
 		
 		try{
 			
-			configfile = connProperties.getProperty( "JPACONFIG" );
-			mapdir = connProperties.getProperty( "MAPDIR" );
-			JPAUtil.constructSessionFactory( configfile, mapdir);
+			//configfile = connProperties.getProperty( "JPACONFIG" );
+			//mapdir = connProperties.getProperty( "MAPDIR" );
+			//JPAUtil.constructSessionFactory( configfile, mapdir);
+			persistenceUnit=connProperties.getProperty( "PERSISTENCE_UNIT" );
+			JPAUtil.constructSessionFactory(persistenceUnit );
 
-			Object testSession = HibernateUtil.currentSession();
+			Object testSession = JPAUtil.currentSession();
 		
 			this.isOpen = true;
 		}catch(Exception e){
@@ -56,7 +60,7 @@ public class Connection implements IConnection
 	{
 		this.isOpen = false;
 		try{
-			HibernateUtil.closeSession();
+			JPAUtil.closeSession();
 		}catch(Exception e){
 			throw new OdaException( e.getLocalizedMessage());
 		}

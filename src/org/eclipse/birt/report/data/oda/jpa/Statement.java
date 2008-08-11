@@ -1,12 +1,9 @@
 /**
  * @(#)Statement.java
- *
- *
- * @author Jorge Fabian Chuquitaype Zuñiga
- * @version 1.00 2008/7/9
  */
 
-//import org.eclipse.datatools.connectivity.oda.IQuery;
+package org.eclipse.birt.report.data.oda.jpa;
+import org.eclipse.datatools.connectivity.oda.IQuery;
 
 import java.util.List;
 import java.util.ArrayList;
@@ -18,7 +15,7 @@ import javax.persistence.EntityManagerFactory;
 import javax.persistence.Persistence;
 import javax.persistence.Query;
 
-public class Statement // implements IQuery
+public class Statement  implements IQuery
 {
 	
 	//private IConnection connection = null;

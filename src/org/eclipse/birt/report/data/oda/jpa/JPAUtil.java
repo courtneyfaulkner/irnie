@@ -64,6 +64,7 @@ public class JPAUtil {
      * specification is located into directory named META-INF, but is necessary
      * have like parameter the PersistenceUnit name  
      **/
+	//private static synchronized void initEntityManagerFactory(String persistenceUnit,Map map) 
 	private static synchronized void initEntityManagerFactory(String persistenceUnit) 
 		throws PersistenceException {
 //>>>>>>> .theirs
@@ -385,7 +386,7 @@ public class JPAUtil {
 	{
 		Bundle jdbcbundle = Platform.getBundle( "org.eclipse.birt.report.data.oda.jdbc" );
 		Bundle jpabundle = Platform.getBundle( "org.eclipse.birt.report.data.oda.jpa" );
-		Bundle tomcatPlgn = Platform.getBundle( "org.eclipse.tomcat" );
+		//Bundle tomcatPlgn = Platform.getBundle( "org.eclipse.tomcat" );
 		
 		
 		
@@ -418,7 +419,7 @@ public class JPAUtil {
 		
 		
 		
-		Enumeration tfiles = tomcatPlgn.getEntryPaths("/" );
+		/*Enumeration tfiles = tomcatPlgn.getEntryPaths("/" );
 		while ( tfiles.hasMoreElements() )
 		{
 			String fileName = (String) tfiles.nextElement();
@@ -427,7 +428,7 @@ public class JPAUtil {
 			//	URLList.add(fileURL);				
 			//}
 				
-		}
+		}*/
 		
 //		URL jarURL = tomcatPlgn.getEntry( "commons-logging-api.jar" );
 //		System.out.println("Hibernate Plugin: Tomcat plugin: URL = " + jarURL );		
