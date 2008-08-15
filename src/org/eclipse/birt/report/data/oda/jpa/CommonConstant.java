@@ -14,7 +14,11 @@ final class CommonConstant
 	public static final String KEYWORD_AS = "AS"; 
 	public static final String KEYWORD_ASTERISK = "*";
 	public static final String DRIVER_NAME = "ODA JPA DRIVER";
+	/* Here are located the classes and JPA config files 
+	 * obs: here must be the directory: META-INF, here is exactly located 
+	 * the JPA config files	 */
 	public static final String JPA_CLASSES = "jpafiles";	
+	//public static final String JPA_CONFIG = "jpafiles";
 	public static final String JPA_LIBS = "lib";	
 
 	public static final int DRIVER_MAJOR_VERSION = 0;

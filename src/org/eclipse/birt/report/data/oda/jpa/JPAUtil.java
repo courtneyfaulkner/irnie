@@ -156,8 +156,7 @@ public class JPAUtil {
 //=======
 	//public static synchronized void buildConfig(String jpafile, String mapdir, Configuration cfg )
 		 throws PersistenceException, IOException, Exception {
-//>>>>>>> .theirs
-		//Bundle hibbundle = Platform.getBundle( "org.eclipse.birt.report.data.oda.hibernate" );
+
 		Bundle jpabundle = Platform.getBundle( "org.eclipse.birt.report.data.oda.jpa" );
 		
 		/*File cfgFile = new File(jpafile);
@@ -247,6 +246,88 @@ public class JPAUtil {
 			s.close();
 		session.set(null);
 	}
+
+
+
+
+	/**
+	 * 
+	 */
+	public static String[] getFieldTypes( String bean ){
+    	Object object = null ;
+    	try {
+    		object = stringToClass(bean).newInstance();
+		}
+		catch (Exception ex) {
+		}
+    	
+    	String[] fieldTypes = null;
+    	BeanInfo bi = null ; 
+    	try{
+    		bi = Introspector.getBeanInfo( object.getClass(),Object.class );
+    	}catch(IntrospectionException iex){
+    		System.out.println("Couldn't Introspection "+getBeanName(object));
+    	}
+    	PropertyDescriptor []properties = bi.getPropertyDescriptors() ; 
+    	fieldTypes = new String[properties.length];
+    	for(int i=0 ; i<properties.length ; i++){
+    		Class class_ = properties[i].getPropertyType();
+    		if(class_ == null)
+    			continue;
+    		fieldTypes[i] =  class_.getName() ;
+    	}    	
+    	return fieldTypes ; 
+    }// getFieldTypes
+    
+    
+    /**
+ 	* 
+ 	*/
+	public static String[] getFieldNames( String bean ){
+		
+		Object object = null;
+    	try {
+    		object = stringToClass(bean).newInstance();
+		}
+		catch (Exception ex) {
+		}
+		
+    	String[] fieldNames = null ; 
+    	BeanInfo bi = null;
+    	try{
+    		bi = Introspector.getBeanInfo(object.getClass(), Object.class );
+    	}catch(IntrospectionException iex){
+    		System.out.println("Couldn't Introspection "+getBeanName(object));
+    	}
+    	PropertyDescriptor[] properties = bi.getPropertyDescriptors();
+    	fieldNames = new String[properties.length];
+    	
+    	for(int i = 0 ;i< properties.length; i++){
+    		fieldNames[i] = properties[i].getName() ;    	
+    	}
+    	return fieldNames ;
+    }//fin de getFieldsNames
+    
+    
+    /**
+ 	* 
+ 	*/
+    private static Class stringToClass(String className){
+    	Class cl = null ; 
+    	try{
+    		cl = Class.forName(className);
+    	}catch(ClassNotFoundException ex){
+    		ex.printStackTrace();
+    	}
+    	return cl ; 
+    }//fin de stringToClass
+    
+}
+
+
+
+
+
 
 	//Get all properties for the given class
 	public static  String[] getJPAProp(String className){
