@@ -207,7 +207,8 @@ public class ResultSet implements IResultSet
 			result = ((Integer)rObj).intValue();
 		}
 	
-		return result;	}
+		return result;	
+	}
 
 	/*
 	 * (non-Javadoc)
