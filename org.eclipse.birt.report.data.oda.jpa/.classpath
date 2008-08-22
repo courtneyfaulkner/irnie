@@ -12,7 +12,7 @@
 	<classpathentry exported="true" kind="lib" path="lib/ehcache-1.1.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/hibernate3.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/jta.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/toplink-essentials-2.0.1-09d-sources.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/toplink-essentials.jar"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
 	<classpathentry kind="con" path="org.eclipse.pde.core.requiredPlugins"/>
 	<classpathentry kind="output" path="bin"/>

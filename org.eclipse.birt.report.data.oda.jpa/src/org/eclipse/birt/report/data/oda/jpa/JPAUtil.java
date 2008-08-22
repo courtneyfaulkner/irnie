@@ -10,8 +10,10 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.Properties;
+import java.util.StringTokenizer;
 
 import org.eclipse.birt.report.data.oda.jdbc.OdaJdbcDriver;
 import org.eclipse.core.runtime.Platform;
@@ -22,7 +24,9 @@ import javax.persistence.Persistence;
 import javax.persistence.PersistenceContext;
 import javax.persistence.PersistenceException;
 import javax.persistence.EntityNotFoundException;
-import javax.persistence.EntityExistException;
+//import javax.persistence.EntityExistException;
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
 
 
 /*in Hibernate used something like: */
@@ -35,8 +39,16 @@ import org.hibernate.EntityMode;
 */
 
 import org.osgi.framework.Bundle;
+import org.w3c.dom.Document;
+import org.w3c.dom.NodeList;
 import org.eclipse.core.runtime.FileLocator;
 import org.eclipse.core.runtime.Path;
+
+/*Used for extract Metadata of JPA entities using Reflection*/
+import java.beans.BeanInfo;
+import java.beans.IntrospectionException;
+import java.beans.Introspector;
+import java.beans.PropertyDescriptor;
 
 public class JPAUtil {
 
@@ -143,6 +155,8 @@ public class JPAUtil {
 		}
 	}
 	
+	
+	
 	public static boolean isEntityManagerFactoryValid() {
 		if( emf != null){
 			return( true );
@@ -150,13 +164,9 @@ public class JPAUtil {
 		return( false );
 	}
 
-//<<<<<<< .mine
+
 	public static synchronized void buildConfig(String persistenceUnit ) throws PersistenceException, IOException, Exception {
-
-//=======
-	//public static synchronized void buildConfig(String jpafile, String mapdir, Configuration cfg )
-		 throws PersistenceException, IOException, Exception {
-
+		 
 		Bundle jpabundle = Platform.getBundle( "org.eclipse.birt.report.data.oda.jpa" );
 		
 		/*File cfgFile = new File(jpafile);
@@ -180,6 +190,7 @@ public class JPAUtil {
 		return;
 	}
 
+	
 	public static void constructEntityManagerFactory(String persistenceUnit) throws PersistenceException {
 
 		/*if( jpafile == null){
@@ -206,7 +217,7 @@ public class JPAUtil {
 			if (s != null) {
 				closeSession();
 			}
-			if (emf != null && !emf.isClosed()){
+			if (emf != null && emf.isOpen()){
 				closeFactory();            	
 			}
 			emf = null;
@@ -249,88 +260,162 @@ public class JPAUtil {
 
 
 
+	/**
+ 	* @param object EntityBean 
+ 	*/
+	public static String getBeanName(Object object) {
+		Class target = object.getClass();
+		return target.getName();
+	}
 
 	/**
 	 * 
 	 */
-	public static String[] getFieldTypes( String bean ){
-    	Object object = null ;
-    	try {
-    		object = stringToClass(bean).newInstance();
-		}
-		catch (Exception ex) {
-		}
-    	
-    	String[] fieldTypes = null;
-    	BeanInfo bi = null ; 
-    	try{
-    		bi = Introspector.getBeanInfo( object.getClass(),Object.class );
-    	}catch(IntrospectionException iex){
-    		System.out.println("Couldn't Introspection "+getBeanName(object));
-    	}
-    	PropertyDescriptor []properties = bi.getPropertyDescriptors() ; 
-    	fieldTypes = new String[properties.length];
-    	for(int i=0 ; i<properties.length ; i++){
-    		Class class_ = properties[i].getPropertyType();
-    		if(class_ == null)
-    			continue;
-    		fieldTypes[i] =  class_.getName() ;
-    	}    	
-    	return fieldTypes ; 
-    }// getFieldTypes
-    
-    
-    /**
- 	* 
- 	*/
-	public static String[] getFieldNames( String bean ){
-		
+	public static String[] getFieldTypes(String bean) {
 		Object object = null;
-    	try {
-    		object = stringToClass(bean).newInstance();
+		try {
+			object = stringToClass(bean).newInstance();
+		} catch (Exception ex) {
 		}
-		catch (Exception ex) {
+
+		String[] fieldTypes = null;
+		BeanInfo bi = null;
+		try {
+			bi = Introspector.getBeanInfo(object.getClass(), Object.class);
+		} catch (IntrospectionException iex) {
+			System.out.println("Couldn't Introspection " + getBeanName(object));
 		}
+		PropertyDescriptor[] properties = bi.getPropertyDescriptors();
+		fieldTypes = new String[properties.length];
+		for (int i = 0; i < properties.length; i++) {
+			Class class_ = properties[i].getPropertyType();
+			if (class_ == null)
+				continue;
+			fieldTypes[i] = class_.getName();
+		}
+		return fieldTypes;
+	}
+	/*
+	 * 
+	 */
+	public static String getFieldType(String bean, String fieldName) {
 		
-    	String[] fieldNames = null ; 
-    	BeanInfo bi = null;
-    	try{
-    		bi = Introspector.getBeanInfo(object.getClass(), Object.class );
-    	}catch(IntrospectionException iex){
-    		System.out.println("Couldn't Introspection "+getBeanName(object));
-    	}
-    	PropertyDescriptor[] properties = bi.getPropertyDescriptors();
-    	fieldNames = new String[properties.length];
-    	
-    	for(int i = 0 ;i< properties.length; i++){
-    		fieldNames[i] = properties[i].getName() ;    	
-    	}
-    	return fieldNames ;
-    }//fin de getFieldsNames
-    
-    
-    /**
+		String type = ""; 
+		
+		String[] fieldTypes = getFieldTypes(bean); 
+		String[] fieldNames = getFieldNames(bean);	
+		
+		for(int i = 0 ; i<fieldTypes.length ;i++)
+			if( fieldNames[i].compareTo(fieldName) == 0   )
+				type = fieldTypes[i];
+		
+		return type ;
+	}
+	/**
  	* 
  	*/
-    private static Class stringToClass(String className){
-    	Class cl = null ; 
-    	try{
-    		cl = Class.forName(className);
-    	}catch(ClassNotFoundException ex){
-    		ex.printStackTrace();
-    	}
-    	return cl ; 
-    }//fin de stringToClass
-    
-}
+	public static String[] getFieldNames(String bean) {
 
+		Object object = null;
+		try {
+			object = stringToClass(bean).newInstance();
+		} catch (Exception ex) {
+		}
+
+		String[] fieldNames = null;
+		BeanInfo bi = null;
+		try {
+			bi = Introspector.getBeanInfo(object.getClass(), Object.class);
+		} catch (IntrospectionException iex) {
+			System.out.println("Couldn't Introspection " + getBeanName(object));
+		}
+		PropertyDescriptor[] properties = bi.getPropertyDescriptors();
+		fieldNames = new String[properties.length];
+
+		for (int i = 0; i < properties.length; i++) {
+			fieldNames[i] = properties[i].getName();
+		}
+		return fieldNames;
+	}
+
+	/**
+ 	* 
+ 	*/
+	private static Class stringToClass(String className) {
+		Class cl = null;
+		try {
+			cl = Class.forName(className);
+		} catch (ClassNotFoundException ex) {
+			ex.printStackTrace();
+		}
+		return cl;
+	}
+	/*
+	 * 
+	 */
+	public static List<String> scanPersistenceXML(String path)throws Exception{
+		
+		DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+	    DocumentBuilder        builder = factory.newDocumentBuilder();
+	    //Document doc = builder.parse("http://localhost:8080/chapter02/people.xml");
+	    Document doc = builder.parse(path);
+	    NodeList childNodes = doc.getChildNodes();
+	    
+	    List<String> entityClassList = new ArrayList<String>();
+	    findNodeClass( childNodes , entityClassList );
+	    
+	    System.out.println("----- persistence.xml Entitys -----");
+	    Iterator it = entityClassList.iterator() ; 
+	    
+	    while(it.hasNext())
+	    	System.out.println( it.next() );
+	    /*
+	    for(String s : entityClasssList )
+	    	System.out.println( s );
+	    */
+	    System.out.println("Scaning OK !!");
+	    return entityClassList; 
+	} 
+	/*
+	 * Recursividad para encontrar los nodos class
+	 */
+	private static void findNodeClass( NodeList childNodes,List<String> entityClassList ){
+		if( childNodes.getLength() <= 0  )
+			return ;
+		for(int i = 0 ; i < childNodes.getLength(); i++){
+			if( childNodes.item(i).getNodeName().toLowerCase().equals("class") )
+				entityClassList.add( childNodes.item(i).getTextContent() );
+			findNodeClass( childNodes.item(i).getChildNodes(), entityClassList );
+		}//End for 
+	}
+	/*
+	 * 
+	 */
+	public static String findEntityOnPersistenceXML( String entity, List<String> entityClassList ){
+		String answer = "" ;
+		for( String s : entityClassList ){
+			StringTokenizer st = new StringTokenizer( s, ".");
+			String token = "";
+			// find the last token which should be the entity name
+			while( st.hasMoreTokens() ) 
+				token = st.nextToken();
+			if( token.trim().equals(entity) ) 
+				answer = s ;
+			else
+				///$$$$$$$%%%%%%%%%%% OJO DEBERIA LANZARSE UN EXCEPCION %%%%%%%%$$$$$$$$$$$
+				///$$$$$$$%%%%%%%%%%% OJO DEBERIA LANZARSE UN EXCEPCION %%%%%%%%$$$$$$$$$$$
+				System.out.println(""+entity+" do not exist into persistence.xml");
+		}
+			
+		return answer ; 
+	}
 
 
 
 
 
 	//Get all properties for the given class
-	public static  String[] getJPAProp(String className){
+	public static  String[] getJPAProp( String className){
 		 //In hibernate is like this:
 		/*Session session = HibernateUtil.currentSession();
 		SessionFactory sf = session.getSessionFactory();
@@ -338,11 +423,13 @@ public class JPAUtil {
 		return( jpaClassProps);*/
 
 		
-		EntityManager session = JPAUtil.currentSession();
-		EntitytManagerFactory emf = session.getEntityManagerFactory();
+		/*EntityManagerFactory session = JPAUtil.currentSession();
+		EntityManager em = session.getEntity();**/
 		//In JPA es: ???
 		/* Code here, about get Class metadata  
 		return  ?; */
+		String[] b={};
+		return  b;
 		
 	}    
 
@@ -360,7 +447,7 @@ public class JPAUtil {
 		 
 		 EntityManager session = JPAUtil.currentSession();
 		//EntityManagerFactory emf = session.getEntityMangerFactory();
-		
+		return new String();
 
 	}    
 
@@ -378,6 +465,7 @@ public class JPAUtil {
 		//In JPA es: ???
 		/* Code here, about get Class metadata  
 		return  ?; */
+		return new Object();
 
 	}    
 

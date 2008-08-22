@@ -39,7 +39,7 @@ public class Activator extends Plugin {
 		//JPAUtil.refreshURLs();		
 		JPAUtil.refreshURLs();		
 		//JPAUtil.pluginLoader = JPAUtil.class.getClassLoader();
-		JPA.pluginLoader = JPAUtil.class.getClassLoader();
+		JPAUtil.pluginLoader = JPAUtil.class.getClassLoader();
 		//ClassLoader changeLoader = new URLClassLoader( (URL [])URLList.toArray(new URL[0]),JPAUtil.class.getClassLoader());
 		//ClassLoader changeLoader = new URLClassLoader( (URL [])URLList.toArray(new URL[0]),thread.getContextClassLoader());
 		//ClassLoader changeLoader = new URLClassLoader( (URL [])JPAUtil.URLList.toArray(new URL[0]), JPAUtil.class.getClassLoader());
