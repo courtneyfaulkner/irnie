@@ -54,7 +54,7 @@ public class ClassLoaderProxy extends ClassLoader
     private static final XPathExpression XPATH_ENTITY_PU_NODE;
     private static final XPathExpression XPATH_ENTITY_CLASS_TEXT;
     
-    private static final String PERSISTENCE_XML = "META-INF/persistence.xml";
+    public static final String PERSISTENCE_XML = "bin/META-INF/persistence.xml";
     
     private static final String MASTER_URL_SUFFIX = "it-tidalwave-bluemarine-persistence.jar!/" + PERSISTENCE_XML;
     

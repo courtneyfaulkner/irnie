@@ -34,6 +34,8 @@ public final class DataTypes
 	public static final int BLOB = Types.BLOB;
 	public static final int BIGDECIMAL = Types.NUMERIC;
 	public static final int NULL = Types.NULL;
+	
+	public static final int LONG = Types.BIGINT;
 
 	private static HashMap typeStringIntPair = new HashMap( );
 
@@ -49,6 +51,8 @@ public final class DataTypes
 		typeStringIntPair.put( "BLOB", new Integer( BLOB ) ); //$NON-NLS-1$
 		typeStringIntPair.put( "BIGDECIMAL", new Integer( BIGDECIMAL ) ); //$NON-NLS-1$
 		typeStringIntPair.put( "NULL", new Integer ( NULL ) );
+		
+		typeStringIntPair.put( "LONG", new Integer ( LONG ) );
 	}
 
 	/**

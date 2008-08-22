@@ -1,12 +1,13 @@
 
-package org.eclipse.birt.report.data.oda.jpa;
-
+package org.eclipse.birt.report.data.oda.hibernate;
+import jfabian.birt.ResultSetMetaData;
 
 import java.lang.reflect.Method;
 import java.math.BigDecimal;
 import java.sql.Date;
 import java.sql.Time;
 import java.sql.Timestamp;
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
@@ -16,23 +17,20 @@ import org.eclipse.datatools.connectivity.oda.IResultSet;
 import org.eclipse.datatools.connectivity.oda.IResultSetMetaData;
 import org.eclipse.datatools.connectivity.oda.OdaException;
 
-/*This used by HIbernate Plugin*/
-//import org.hibernate.type.Type;
-
 /**
  * This class implements IResultSet interface of ODA
  */
-
 public class ResultSet implements IResultSet
 {
-
 	private static final int CURSOR_INITIAL_VALUE = -1;
 	private IResultSetMetaData resultSetMetaData = null;
+	//private ResultSetMetaData resultSetMetaData = null;
+
 	private int maxRows = 0;
 	private int cursor = CURSOR_INITIAL_VALUE;
 	private Iterator rowiter = null;
 	private Object currentRow = null;
-	private Type[] qryReturnTypes = null;
+	private String[] qryReturnEntity = null;
 	
 	//Boolean which marks whether it is successful of last call to getXXX();
 	private boolean wasNull = false;
@@ -46,16 +44,15 @@ public class ResultSet implements IResultSet
 	 * @param rSMD
 	 *            the metadata of sData
 	 */
-	ResultSet( List rs, IResultSetMetaData rSMD, Type[] qryReturnTypes )
+	ResultSet( List rs, IResultSetMetaData rSMD, String[] qryReturnTypes )
 	{
 		//Row Data
 		this.rowiter = rs.iterator();
 		//Metadata
 		this.resultSetMetaData = rSMD;
 		//interp result set as Entity or Array
-		this.qryReturnTypes = qryReturnTypes;
+		this.qryReturnEntity = qryReturnEntity;
 	}
-
 	/*
 	 * (non-Javadoc)
 	 *
@@ -67,7 +64,6 @@ public class ResultSet implements IResultSet
 	{
 		return this.resultSetMetaData;
 	}
-
 	/*
 	 * (non-Javadoc)
 	 *
@@ -79,10 +75,8 @@ public class ResultSet implements IResultSet
 		this.rowiter = null;
 		this.resultSetMetaData = null;
 		this.currentRow = null;
-		this.qryReturnTypes = null;
-	
+		this.qryReturnEntity = null;
 	}
-
 	/*
 	 * (non-Javadoc)
 	 *
@@ -92,7 +86,6 @@ public class ResultSet implements IResultSet
 	{
 		this.maxRows = max;
 	}
-
 	/*
 	 * (non-Javadoc)
 	 *
@@ -100,7 +93,7 @@ public class ResultSet implements IResultSet
 	 */
 	public boolean next( ) throws OdaException
 	{
-		if ( this.maxRows <= 0? false:cursor >= this.maxRows - 1) 
+		if ( this.maxRows <= 0 ? false : cursor >= this.maxRows - 1 ) 
 		{
 			cursor = CURSOR_INITIAL_VALUE;
 			return false;
@@ -109,13 +102,11 @@ public class ResultSet implements IResultSet
 
 			cursor = CURSOR_INITIAL_VALUE;
 			return false;
-			
 		}
 		currentRow = rowiter.next();
 		cursor++;
 		return true;
 	}
-
 	/*
 	 * (non-Javadoc)
 	 *
@@ -126,7 +117,6 @@ public class ResultSet implements IResultSet
 		testFetchStarted( );
 		return this.cursor;
 	}
-
 	/*
 	 * (non-Javadoc)
 	 *
@@ -145,7 +135,6 @@ public class ResultSet implements IResultSet
 		this.wasNull = (result == null);
 		return result;
 	}
-
 	/*
 	 * (non-Javadoc)
 	 *
@@ -153,7 +142,6 @@ public class ResultSet implements IResultSet
 	 */
 	public String getString( String columnName ) throws OdaException
 	{
-
 		String result;
 		testFetchStarted( );
 		Object rObj = getResult(findColumn( columnName ));
@@ -163,11 +151,9 @@ public class ResultSet implements IResultSet
 			result = rObj.toString();
 		}
 		this.wasNull = (result == null);
-		return result;	
-	
-	
+		
+		return result;
 	}
-
 	/*
 	 * (non-Javadoc)
 	 *
@@ -188,7 +174,6 @@ public class ResultSet implements IResultSet
 	
 		return result;			
 	}
-
 	/*
 	 * (non-Javadoc)
 	 *
@@ -209,7 +194,45 @@ public class ResultSet implements IResultSet
 	
 		return result;	
 	}
-
+	/*
+	 * (non-Javadoc)
+	 *
+	 * @see org.eclipse.birt.data.oda.IResultSet#getInt(int)
+	 */
+	public Long getLong( int index ) throws OdaException
+	{
+		Long result;
+		testFetchStarted( );
+		Object rObj = getResult(index);
+		if( rObj == null){
+			result = new Long(0);
+			this.wasNull = true;			
+		}else{
+			this.wasNull = false;
+			result = ((Long)rObj).longValue();
+		}
+	
+		return result;			
+	}
+	/*
+	 * (non-Javadoc)
+	 *
+	 * @see org.eclipse.birt.data.oda.IResultSet#getInt(java.lang.String)
+	 */
+	public Long getLong( String columnName ) throws OdaException
+	{
+		Long result;
+		testFetchStarted( );
+		Object rObj = getResult(findColumn( columnName ));
+		if( rObj == null){
+			result = new Long(0);
+			this.wasNull = true;			
+		}else{
+			this.wasNull = false;
+			result = ((Long)rObj).longValue();
+		}
+		return result;	
+	}
 	/*
 	 * (non-Javadoc)
 	 *
@@ -228,10 +251,8 @@ public class ResultSet implements IResultSet
 			result = ((Double)rObj).doubleValue();
 		}
 	
-		return result;			
-		
+		return result;
 	}
-
 	/*
 	 * (non-Javadoc)
 	 *
@@ -250,8 +271,8 @@ public class ResultSet implements IResultSet
 			result = ((Double)rObj).doubleValue();
 		}
 	
-		return result;			}
-
+		return result;		
+	}
 	/*
 	 * (non-Javadoc)
 	 *
@@ -270,10 +291,8 @@ public class ResultSet implements IResultSet
 			result = (BigDecimal)rObj;
 		}
 	
-		return result;			
-		
+		return result;
 	}
-
 	/*
 	 * (non-Javadoc)
 	 *
@@ -294,7 +313,6 @@ public class ResultSet implements IResultSet
 	
 		return result;		
 	}
-
 	/*
 	 * (non-Javadoc)
 	 *
@@ -314,7 +332,6 @@ public class ResultSet implements IResultSet
 	
 		return result;
 	}
-
 	/*
 	 * (non-Javadoc)
 	 *
@@ -334,7 +351,6 @@ public class ResultSet implements IResultSet
 	
 		return result;
 	}
-
 	/*
 	 * (non-Javadoc)
 	 *
@@ -354,7 +370,6 @@ public class ResultSet implements IResultSet
 	
 		return result;
 	}
-
 	/*
 	 * (non-Javadoc)
 	 *
@@ -374,7 +389,6 @@ public class ResultSet implements IResultSet
 	
 		return result;
 	}
-
 	/*
 	 * (non-Javadoc)
 	 *
@@ -394,7 +408,6 @@ public class ResultSet implements IResultSet
 	
 		return result;
 	}
-
 	/*
 	 * (non-Javadoc)
 	 *
@@ -444,7 +457,6 @@ public class ResultSet implements IResultSet
 	{
 		return this.wasNull;
 	}
-
 	/*
 	 * (non-Javadoc)
 	 *
@@ -463,8 +475,6 @@ public class ResultSet implements IResultSet
 		}
 		throw new OdaException( Messages.getString("ResultSet.COLUMN_NOT_FOUND")+ columnName ); //$NON-NLS-1$
 	}
-
-
 	/**
 	 * Test if the cursor has been initialized
 	 *
@@ -476,48 +486,30 @@ public class ResultSet implements IResultSet
 		if ( this.cursor < 0 )
 			throw new OdaException( Messages.getString("ResultSet.CURSOR_HAS_NOT_BEEN_INITIALIZED") ); //$NON-NLS-1$
 	}
-
-	
-	private Object getResult( int rstcol) throws OdaException{
-	
+	/*
+	 * 
+	 */
+	private Object getResult( int rstcol) throws OdaException
+	{
 		Object obj = this.currentRow;
 		Object value = null;
 			
 		try{
-	
-			
-			//When specifing the HQL "from object" the returned type is a Hibernate EntityType
-			//When the columns are specified the returned values are normal data types
-			//The first half of this if statment handles the EntityType, the else handles the
-			//other case.
-			//We are not handling multipe result sets.
-			
-			if( qryReturnTypes.length > 0 && qryReturnTypes[0].isEntityType()){	
-				
-				String checkClass = ((ResultSetMetaData)getMetaData()).getColumnClass(rstcol);				
-				Object myVal =  HibernateUtil.getHibernatePropVal(obj, checkClass, getMetaData().getColumnName(rstcol));
-				value = myVal;
-						
+			if( getMetaData().getColumnCount() > 1 ){
+				Object[] values = (Object[])obj;
+				value = values[rstcol-1];
 			}else{
 				
 				if( getMetaData().getColumnCount() == 1){
 					value = obj;
 				}else{
-					
 					Object[] values = (Object[])obj; 
 					value = values[rstcol-1];
-					
 				}
 			}
-			
-			
 		}catch(Exception e){
 			throw new OdaException( e.getLocalizedMessage() );
 		}
-		
-		
 		return(value);
-
 	}
-	
-}
+}// End ResultSet
