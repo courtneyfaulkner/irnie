@@ -6,8 +6,8 @@ import org.eclipse.datatools.connectivity.oda.IQuery;
 import org.eclipse.datatools.connectivity.oda.OdaException;
 
 import java.util.Properties;
-import java.net.*;
-import javax.persistence.*;
+//import java.net.*;
+import javax.persistence.PersistenceException;
 
 
 /**
@@ -41,11 +41,13 @@ public class Connection implements IConnection
 			//mapdir = connProperties.getProperty( "MAPDIR" );
 			//JPAUtil.constructSessionFactory( configfile, mapdir);
 			persistenceUnit=connProperties.getProperty( "PERSISTENCE_UNIT" );
-			JPAUtil.constructSessionFactory(persistenceUnit );
+			JPAUtil.constructEntityManagerFactory(persistenceUnit );
 
 			Object testSession = JPAUtil.currentSession();
 		
 			this.isOpen = true;
+		}catch(PersistenceException e){
+			throw new OdaException( e.getLocalizedMessage());
 		}catch(Exception e){
 			throw new OdaException( e.getLocalizedMessage());
 		}
@@ -61,7 +63,10 @@ public class Connection implements IConnection
 		this.isOpen = false;
 		try{
 			JPAUtil.closeSession();
-		}catch(Exception e){
+		}catch(PersistenceException e){
+			throw new OdaException( e.getLocalizedMessage());
+		}
+		catch(Exception e){
 			throw new OdaException( e.getLocalizedMessage());
 		}
 

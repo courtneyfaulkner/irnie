@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
 	<classpathentry kind="src" path="src"/>
+	<classpathentry exported="true" kind="lib" path="lib/toplink-essentials.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/ant-antlr-1.6.5.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/antlr-2.7.6rc1.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/asm.jar"/>
@@ -12,7 +13,6 @@
 	<classpathentry exported="true" kind="lib" path="lib/ehcache-1.1.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/hibernate3.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/jta.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/toplink-essentials.jar"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
 	<classpathentry kind="con" path="org.eclipse.pde.core.requiredPlugins"/>
 	<classpathentry kind="output" path="bin"/>

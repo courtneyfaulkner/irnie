@@ -16,8 +16,9 @@ import org.eclipse.datatools.connectivity.oda.IResultSet;
 import org.eclipse.datatools.connectivity.oda.IResultSetMetaData;
 import org.eclipse.datatools.connectivity.oda.OdaException;
 import org.eclipse.datatools.connectivity.oda.SortSpec;
-import org.hibernate.Session;
-import org.hibernate.type.Type;
+//import org.hibernate.Session;
+//import org.hibernate.type.Type;
+import org.w3c.dom.Node;
 
 import java.math.BigDecimal;
 import java.sql.Date;
@@ -29,7 +30,7 @@ import java.util.StringTokenizer;
 import java.util.Arrays;
 
 import javax.persistence.EntityManager;
-import javax.persistence.EntityManagerFactory;
+//import javax.persistence.EntityManagerFactory;
 import javax.persistence.Persistence;
 import javax.persistence.Query;
 
@@ -44,9 +45,15 @@ public class Statement  implements IQuery
 	private static String query;
 	private int m_maxRows;
 	
-    public Statement() {
-    	
-    }    
+	 /**
+	 * Constructor
+	 *
+	 */
+	Statement( IConnection conn) throws OdaException
+	{
+		this.connection = conn;
+		
+	}
     /**
 	 * 
 	 */    
@@ -65,9 +72,11 @@ public class Statement  implements IQuery
 		List<String> arColsName = new ArrayList<String>();	// holds the  column name
 	    List<String> arColEntity = new ArrayList<String>();	// holds the  column class
 	    	  	
-		// reading all persistence.xml class Nodes 
-		List<Node> classNodes = JPAUtil.findNodeByName(ClassLoaderProxy.PERSISTENCE_XML, "class");
+		
 		try{
+			//reading all persistence.xml class Nodes 
+			List<Node> classNodes = JPAUtil.findNodeByName(CommonConstant.PERSISTENCE_XML, "class");
+			
 			qry = qry.replaceAll("[\\n\\r]+"," ").trim();
 			
 			List<List<String>> columnList = new ArrayList<List<String>>();
@@ -153,7 +162,7 @@ public class Statement  implements IQuery
                return columnList ;
            } else {
         	   throw new OdaException( Messages.getString("Statement.QUERY_STRUCTURE_ERROR") );        	   
-        	   return null;
+        	  // return null;
            }
     }
 	/**
@@ -194,7 +203,7 @@ public class Statement  implements IQuery
             return entityList;
          } else {
         	throw new OdaException( Messages.getString("Statement.QUERY_STRUCTURE_ERROR") );
-           	return null;
+           	//return null;
          }
 	} 
 	/**
@@ -233,7 +242,7 @@ public class Statement  implements IQuery
    	/*
    	 * 
    	 */
-	public void printResultSet (List list, String[] qryReturnTypes){
+	public void printResultSet (List list, String[] qryReturnTypes) throws OdaException{
 		/*
 		Iterator iter = list.iterator();
 		System.out.println("******** Resultado de Consulta *************");

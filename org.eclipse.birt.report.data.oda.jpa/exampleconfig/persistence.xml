@@ -6,14 +6,14 @@
     
     <persistence-unit name="tutorialPU" transaction-type="RESOURCE_LOCAL">
     
-        <class>rdacardenas.tutorial.entidad.Empleado</class>
-        <class>rdacardenas.tutorial.entidad.Departamento</class>
+        <class>Empleado</class>
+        <class>Departamento</class>
         <properties>
             <property name="toplink.logging.level" value="INFO"/>
             
             <property name="toplink.jdbc.user" value="postgres"/>
             <property name="toplink.jdbc.password" value="postgres"/>
-            <property name="toplink.jdbc.url" value="jdbc:postgresql://localhost:5432/postgres"/>
+            <property name="toplink.jdbc.url" value="jdbc:postgresql://localhost:5432/demo"/>
             <property name="toplink.jdbc.driver" value="org.postgresql.Driver"/>
             <!-- 
             <property name="toplink.ddl-generation" value="create-tables"/>

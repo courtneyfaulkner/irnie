@@ -18,6 +18,7 @@ final class CommonConstant
 	 * obs: here must be the directory: META-INF, here is exactly located 
 	 * the JPA config files	 */
 	public static final String JPA_CLASSES = "jpafiles";	
+	public static final String PERSISTENCE_XML = "META-INF/persistence.xml";
 	//public static final String JPA_CONFIG = "jpafiles";
 	public static final String JPA_LIBS = "lib";	
 

@@ -4,14 +4,14 @@ import java.io.*;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.sql.Driver;
-import java.sql.DriverManager;
+//import java.sql.DriverManager;
 import java.sql.DriverPropertyInfo;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
+//import java.util.Map;
 import java.util.Properties;
 import java.util.StringTokenizer;
 
@@ -21,13 +21,13 @@ import org.eclipse.core.runtime.Platform;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.Persistence;
-import javax.persistence.PersistenceContext;
+//import javax.persistence.PersistenceContext;
 import javax.persistence.PersistenceException;
-import javax.persistence.EntityNotFoundException;
+//import javax.persistence.EntityNotFoundException;
 //import javax.persistence.EntityExistException;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
-
+import org.eclipse.datatools.connectivity.oda.OdaException;
 
 /*in Hibernate used something like: */
 /*
@@ -39,11 +39,11 @@ import org.hibernate.EntityMode;
 */
 import org.w3c.dom.Document;
 import org.w3c.dom.NodeList;
-import org.w3c.dom.Node;;
+import org.w3c.dom.Node;
 
 import org.osgi.framework.Bundle;
-import org.eclipse.core.runtime.FileLocator;
-import org.eclipse.core.runtime.Path;
+//import org.eclipse.core.runtime.FileLocator;
+//import org.eclipse.core.runtime.Path;
 
 /*Used for extract Metadata of JPA entities using Reflection*/
 import java.beans.BeanInfo;
@@ -73,14 +73,13 @@ public class JPAUtil {
 //=======
     /*
      * like a HIbernate Plug-in init the Entity Manager factory 
-     * isn't necessary get a name of peristence files because according to
+     * isn't necessary get a name of persistence files because according to
      * specification is located into directory named META-INF, but is necessary
      * have like parameter the PersistenceUnit name  
      **/
 	//private static synchronized void initEntityManagerFactory(String persistenceUnit,Map map) 
 	private static synchronized void initEntityManagerFactory(String persistenceUnit) 
 		throws PersistenceException {
-//>>>>>>> .theirs
 		ClassLoader cl1;
 		
 		if( emf == null){
@@ -102,7 +101,7 @@ public class JPAUtil {
 				//changeLoader = new URLClassLoader( (URL [])URLList.toArray(new URL[0]));
 				/*Set the context with testLoader ClassLoader(a URLClassLoader)*/
 				thread.setContextClassLoader(testLoader);
-				
+				//Bundle jpabundle = Platform.getBundle( "org.eclipse.birt.report.data.oda.jpa" );
 				/*In Hibernate Plug-in*/	
 				//Class thwy2 = changeLoader.loadClass("org.hibernate.cfg.Configuration");
 				//Class.forName("org.apache.commons.logging.LogFactory", true, changeLoader);
@@ -140,6 +139,10 @@ public class JPAUtil {
 				}*/
 				
 				//sessionFactory = cfg.buildSessionFactory();
+				System.out.println("PU: "+persistenceUnit);
+				//System.out.println("Location: "+jpabundle.getLocation());
+				File f=new File(CommonConstant.PERSISTENCE_XML);
+				System.out.println("Ruta: "+f.getAbsolutePath());
 				emf = Persistence.createEntityManagerFactory(persistenceUnit);
 				//configuration = cfg;
 				//JPAMapDirectory = mapdir;
@@ -175,7 +178,7 @@ public class JPAUtil {
 		if( cfgDir != null && cfgDir.length() > 0){
 			cfg.addDirectory(cfgDir);
 		}
-	      */
+	    */
 		
 		/*URL jpafiles = FileLocator.find(jpabundle, new Path(CommonConstant.JPA_CLASSES), null);
 		URL jpaURL = FileLocator.resolve(jpafiles);
@@ -351,6 +354,8 @@ public class JPAUtil {
 		if ( jdbcbundle == null )
 			return;			// init failed
 
+		//jpabundle.getEntryPaths(arg0)
+		
 		// List all files under "drivers" directory of the JDBC plugin
 		Enumeration files = jdbcbundle.getEntryPaths( 
 				OdaJdbcDriver.Constants.DRIVER_DIRECTORY );
@@ -365,9 +370,17 @@ public class JPAUtil {
 					FileList.add( fileName );
 					URL fileURL = jdbcbundle.getEntry( fileName );
 					URLList.add(fileURL);
-
+					//File f=new File("");
 					System.out.println("JDBC Plugin: found JAR/Zip file: " + 
-							fileName + ": URL=" + fileURL );
+							fileName + ": URL=  " + fileURL );
+					try{
+							File f=new File(fileURL.getFile());
+					System.out.println("JDBC Plugin ABS: found JAR/Zip file: " + 
+							fileName + ": URL=  " + f.getAbsolutePath() );
+					}catch(Exception e){
+						System.out.println(e.getMessage());
+						
+					}
 				}
 			}
 		}
@@ -395,7 +408,7 @@ public class JPAUtil {
 		
 		
 		// List all files under "jpaclassfiles" directory of this plugin
-		Enumeration jpaFiles = jpabundle.getEntryPaths( 
+		/*Enumeration jpaFiles = jpabundle.getEntryPaths( 
 				CommonConstant.JPA_CLASSES );
 		while ( jpaFiles.hasMoreElements() )
 		{
@@ -414,7 +427,7 @@ public class JPAUtil {
 				}
 			}
 		}
-		
+		*/
 		
 		// List all files under "hibclassfiles" directory of this plugin
 /*		Enumeration hiblibs = hibbundle.getEntryPaths( 
@@ -436,17 +449,77 @@ public class JPAUtil {
 				}
 			}
 		}		
-	*/	
-		
-		
-		
-		FileList.add( CommonConstant.JPA_CLASSES );
-		URL fileURL = jpabundle.getEntry( CommonConstant.JPA_CLASSES );
-		URLList.add(fileURL);	
-		System.out.println("JPA Plugin: add folder for standalone classes file: " + 
-				CommonConstant.JPA_CLASSES + ": URL=" + fileURL );
-	
+	*/
 
+		Enumeration jpa_root = jpabundle.getEntryPaths("/");
+		while ( jpa_root.hasMoreElements() )
+		{
+			String fileName = (String) jpa_root.nextElement();
+			if ( isDriverFile( fileName ) )
+			{
+				if ( ! FileList.contains( fileName ))
+				{
+					// This is a new file not previously added to URL list
+					FileList.add( fileName );
+					URL fileURL = jpabundle.getEntry( fileName );
+					URLList.add(fileURL);
+
+					System.out.println("JPA root: found JAR/Zip file: " + 
+							fileName + ": URL=" + fileURL );
+				}
+			}
+		}		
+
+		
+		
+		
+		//URL fileMeta=jpabundle.getEntry(PU_meta);
+	/*try{
+		String PU_meta="C:\\App\\Java\\birt-runtime-2_3_0\\ReportEngine\\plugins\\org.eclipse.birt.report.data.oda.jpa_2.0.0\\";
+		
+		FileList.add(PU_meta);
+		File f=new File(PU_meta);
+		URL fileMeta=f.toURI().toURL();
+		URLList.add(fileMeta);
+		System.out.println("META: " + fileMeta.getPath());
+		
+		URL raiz=jpabundle.getEntry("/");
+		FileList.add("/");
+		URLList.add(raiz);
+		
+		
+	}catch(Exception e){
+		System.out.println(e.getMessage());
+	}*/
+		//FileList.add("C:\App\Java\birt-runtime-2_3_0\ReportEngine\plugins\org.eclipse.birt.report.data.oda.jpa_2.0.0");
+		FileList.add( CommonConstant.PERSISTENCE_XML );
+		URL fileURL3 = jpabundle.getEntry( CommonConstant.PERSISTENCE_XML );
+		URLList.add(fileURL3);
+		System.out.println("Persistence.xml: add folder for standalone: " + 
+				CommonConstant.PERSISTENCE_XML  + ": URL=" + fileURL3 );
+		/*FileList.add( CommonConstant.JPA_CLASSES );
+		URL fileURL = jpabundle.getEntry( CommonConstant.JPA_CLASSES );
+		URLList.add(fileURL);
+		*/
+		//FileList.add( CommonConstant.JPA_CLASSES );
+		//Enumeration fileURL2 = jpabundle.getEntryPaths( CommonConstant.JPA_LIBS);
+		//URLList.add(fileURL2);
+		
+		//System.out.println("JPA Plugin: add folder for standalone classes file: " + 
+		//		CommonConstant.JPA_CLASSES + ": URL=" + fileURL );
+		/*System.out.println("JPA Plugin: add folder for standalone lib file: " + 
+				CommonConstant.JPA_LIBS + ": URL=" + fileURL2 );*/
+	
+		//Enumeration i=jpabundle.getEntryPaths("/");
+		System.out.println("****** FileList*********");
+		for(int i=0;i<FileList.size();i++){
+			System.out.println("File: "+FileList.get(i));
+		}
+		
+		System.out.println("\n****** URLList*********");
+		for(int k=0;k<URLList.size();k++){
+			System.out.println("URL: "+URLList.get(k));
+		}
 
 		return;
 	}//END refreshURLs   method
@@ -592,7 +665,7 @@ public class JPAUtil {
 	 * 
 	 */
 	public static List<Node> findNodeByName( String pathPersistenceXML, String nameNode )
-	throws OdaException
+	throws Exception //throws OdaException
 	{
 		List<Node> nodes = new ArrayList<Node>();
 		List<Node> temp = new ArrayList<Node>();

@@ -1,6 +1,6 @@
 
-package org.eclipse.birt.report.data.oda.hibernate;
-import jfabian.birt.ResultSetMetaData;
+package org.eclipse.birt.report.data.oda.jpa;
+//import jfabian.birt.ResultSetMetaData;
 
 import java.lang.reflect.Method;
 import java.math.BigDecimal;
@@ -351,6 +351,47 @@ public class ResultSet implements IResultSet
 	
 		return result;
 	}
+	
+	
+	/*
+	 * (non-Javadoc)
+	 *
+	 * @see org.eclipse.birt.data.oda.IResultSet#getDate(int)
+	 */
+	public boolean getBoolean( int index ) throws OdaException
+	{
+		Boolean result = null;
+		testFetchStarted( );
+		Object rObj = getResult(index);
+		if( rObj == null){
+			this.wasNull = true;			
+		}else{
+			this.wasNull = false;
+			result = (Boolean)rObj;
+		}
+	
+		return result;
+	}
+	/*
+	 * (non-Javadoc)
+	 *
+	 * @see org.eclipse.birt.data.oda.IResultSet#getDate(java.lang.String)
+	 */
+	public boolean getBoolean( String columnName ) throws OdaException
+	{
+		Boolean result = null;
+		testFetchStarted( );
+		Object rObj = getResult(findColumn( columnName ));
+		if( rObj == null){
+			this.wasNull = true;			
+		}else{
+			this.wasNull = false;
+			result = (Boolean)rObj;
+		}
+	
+		return result;
+	}
+	
 	/*
 	 * (non-Javadoc)
 	 *
