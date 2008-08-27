@@ -4,7 +4,7 @@ import java.io.*;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.sql.Driver;
-//import java.sql.DriverManager;
+import java.sql.DriverManager;
 import java.sql.DriverPropertyInfo;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -54,6 +54,9 @@ import java.beans.PropertyDescriptor;
 public class JPAUtil {
 
 	private static EntityManagerFactory emf=null;
+	
+	//private static String application="C:/App/Java/birt-runtime-2_3_0/ReportEngine/examplejpa/";
+	private static String application="";
 	//private static Object configuration=null;
 
 	//private static String JPAConfigFile = "";
@@ -67,11 +70,9 @@ public class JPAUtil {
     /*For manage easily share EntitiManagerFactory*/
 	public static final ThreadLocal session = new ThreadLocal();
 
-//<<<<<<< .mine
 	//private static synchronized void initEntityManagerFactory( String persistenceUnit) throws PersistenceException {
 
-//=======
-    /*
+	/*
      * like a HIbernate Plug-in init the Entity Manager factory 
      * isn't necessary get a name of persistence files because according to
      * specification is located into directory named META-INF, but is necessary
@@ -116,16 +117,17 @@ public class JPAUtil {
 				//z/ buildConfig(persistenceUnit);	
 
 
-				//z/ Class driverClass = testLoader.loadClass(cfg.getProperty("connection.driver_class"));
+				Class driverClass = testLoader.loadClass("org.postgresql.Driver");
 				
 				
-				//Driver driver = (Driver) driverClass.newInstance( );
-				//WrappedDriver wd = new WrappedDriver( driver, cfg.getProperty("connection.driver_class"));
+				Driver driver = (Driver) driverClass.newInstance( );
+				WrappedDriver wd = new WrappedDriver( driver,"org.postgresql.Driver");
 
-				//boolean foundDriver = false;
-				/*Enumeration drivers = DriverManager.getDrivers();
+				boolean foundDriver = false;
+				Enumeration drivers = DriverManager.getDrivers();
 				while (drivers.hasMoreElements()) {
 					Driver nextDriver = (Driver)drivers.nextElement();
+					System.out.println("Driver: "+nextDriver.toString());
 					if (nextDriver.getClass() == wd.getClass()) {
 						if( nextDriver.toString().equals(wd.toString()) ){
 							foundDriver = true;
@@ -136,12 +138,13 @@ public class JPAUtil {
 				if( !foundDriver ){
 
 					DriverManager.registerDriver( wd  ) ;
-				}*/
+				}
 				
 				//sessionFactory = cfg.buildSessionFactory();
 				System.out.println("PU: "+persistenceUnit);
+				
 				//System.out.println("Location: "+jpabundle.getLocation());
-				File f=new File(CommonConstant.PERSISTENCE_XML);
+				File f=new File(application+CommonConstant.PERSISTENCE_XML);
 				System.out.println("Ruta: "+f.getAbsolutePath());
 				emf = Persistence.createEntityManagerFactory(persistenceUnit);
 				//configuration = cfg;
@@ -451,7 +454,7 @@ public class JPAUtil {
 		}		
 	*/
 
-		Enumeration jpa_root = jpabundle.getEntryPaths("/");
+		/*Enumeration jpa_root = jpabundle.getEntryPaths("/");
 		while ( jpa_root.hasMoreElements() )
 		{
 			String fileName = (String) jpa_root.nextElement();
@@ -469,34 +472,38 @@ public class JPAUtil {
 				}
 			}
 		}		
-
+     */
 		
 		
 		
 		//URL fileMeta=jpabundle.getEntry(PU_meta);
-	/*try{
-		String PU_meta="C:\\App\\Java\\birt-runtime-2_3_0\\ReportEngine\\plugins\\org.eclipse.birt.report.data.oda.jpa_2.0.0\\";
-		
-		FileList.add(PU_meta);
-		File f=new File(PU_meta);
+	try{
+		//String PU_meta="C:\\App\\Java\\birt-runtime-2_3_0\\ReportEngine\\plugins\\org.eclipse.birt.report.data.oda.jpa_2.0.0\\";
+		//String ejemplo="C:/App/Java/birt-runtime-2_3_0/ReportEngine/examplejpa/";
+		String ejemplo=JPAUtil.application;
+		//FileList.add(PU_meta);
+		FileList.add(ejemplo);
+		//File f=new File(PU_meta);
+		File f=new File(ejemplo);
 		URL fileMeta=f.toURI().toURL();
 		URLList.add(fileMeta);
-		System.out.println("META: " + fileMeta.getPath());
+		//System.out.println("META: " + fileMeta.getPath());
+		System.out.println("APP: " + fileMeta.getPath());
 		
-		URL raiz=jpabundle.getEntry("/");
+		/*URL raiz=jpabundle.getEntry("/");
 		FileList.add("/");
-		URLList.add(raiz);
+		URLList.add(raiz);*/
 		
 		
 	}catch(Exception e){
 		System.out.println(e.getMessage());
-	}*/
+	}
 		//FileList.add("C:\App\Java\birt-runtime-2_3_0\ReportEngine\plugins\org.eclipse.birt.report.data.oda.jpa_2.0.0");
-		FileList.add( CommonConstant.PERSISTENCE_XML );
-		URL fileURL3 = jpabundle.getEntry( CommonConstant.PERSISTENCE_XML );
-		URLList.add(fileURL3);
-		System.out.println("Persistence.xml: add folder for standalone: " + 
-				CommonConstant.PERSISTENCE_XML  + ": URL=" + fileURL3 );
+		//FileList.add( CommonConstant.PERSISTENCE_XML );
+		//URL fileURL3 = jpabundle.getEntry( CommonConstant.PERSISTENCE_XML );
+		//URLList.add(fileURL3);
+		//System.out.println("Persistence.xml: add folder for standalone: " + 
+			//	CommonConstant.PERSISTENCE_XML  + ": URL=" + fileURL3 );
 		/*FileList.add( CommonConstant.JPA_CLASSES );
 		URL fileURL = jpabundle.getEntry( CommonConstant.JPA_CLASSES );
 		URLList.add(fileURL);
@@ -644,8 +651,9 @@ public class JPAUtil {
 	 
 	    List<Node> nodes = new ArrayList<Node>() ;
 	    // find all nodes
+	    System.out.println("Encontrando All Nodos");
 	    findAllNodes( doc.getChildNodes() , nodes );
-	 
+	    System.out.println("Encontró All Nodos");
 	    return nodes; 
 	}
 	/*
@@ -670,6 +678,7 @@ public class JPAUtil {
 		List<Node> nodes = new ArrayList<Node>();
 		List<Node> temp = new ArrayList<Node>();
 		temp = scanPersistenceXML(pathPersistenceXML);
+		System.out.println("Escaneando XML");
 		Iterator<Node> it = temp.iterator();
 		while(it.hasNext()){
 			Node node = it.next(); 
@@ -715,5 +724,13 @@ public class JPAUtil {
 		while( st.hasMoreTokens() )
 			type = st.nextToken();
 		return type; 
-	}	
+	}
+	
+	public static void setApplication(String s){
+		JPAUtil.application=s;
+	}
+	
+	public static String getApplication(){
+		return JPAUtil.application;
+	}
 }// END JPAUtil class 

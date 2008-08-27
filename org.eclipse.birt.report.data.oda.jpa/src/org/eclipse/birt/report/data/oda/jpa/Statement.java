@@ -75,8 +75,11 @@ public class Statement  implements IQuery
 		
 		try{
 			//reading all persistence.xml class Nodes 
-			List<Node> classNodes = JPAUtil.findNodeByName(CommonConstant.PERSISTENCE_XML, "class");
-			
+			String persist=JPAUtil.getApplication().concat(CommonConstant.PERSISTENCE_XML);
+			//List<Node> classNodes = JPAUtil.findNodeByName(CommonConstant.PERSISTENCE_XML, "class");
+			System.out.println("Persitence ok :"+persist);
+			List<Node> classNodes = JPAUtil.findNodeByName(persist, "class");
+			System.out.println("Obtuvo los nodos");
 			qry = qry.replaceAll("[\\n\\r]+"," ").trim();
 			
 			List<List<String>> columnList = new ArrayList<List<String>>();

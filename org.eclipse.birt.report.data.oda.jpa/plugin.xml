@@ -28,6 +28,12 @@
                   name="PERSISTENCE_UNIT"
                   type="string">
             </property>
+            <property
+                  canInherit="true"
+                  defaultDisplayName="Example of Application JPA "
+                  name="APP_JPA"
+                  type="string">
+            </property>
          </properties>
       </dataSource>
       <dataSet

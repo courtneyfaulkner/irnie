@@ -21,6 +21,7 @@ public class Connection implements IConnection
 	//private String configfile = null;
 	//private String mapdir = null;
 	private String persistenceUnit = null;
+	private String path_application = null;
 	
 	/*
 	 * (non-Javadoc)
@@ -41,8 +42,10 @@ public class Connection implements IConnection
 			//mapdir = connProperties.getProperty( "MAPDIR" );
 			//JPAUtil.constructSessionFactory( configfile, mapdir);
 			persistenceUnit=connProperties.getProperty( "PERSISTENCE_UNIT" );
+			path_application=connProperties.getProperty( "APP_JPA" );
+			JPAUtil.setApplication(path_application);
+			JPAUtil.refreshURLs();
 			JPAUtil.constructEntityManagerFactory(persistenceUnit );
-
 			Object testSession = JPAUtil.currentSession();
 		
 			this.isOpen = true;
