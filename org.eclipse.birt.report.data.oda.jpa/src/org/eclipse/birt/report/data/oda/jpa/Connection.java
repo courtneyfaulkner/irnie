@@ -17,9 +17,7 @@ import javax.persistence.PersistenceException;
 public class Connection implements IConnection
 {
 
-	private boolean isOpen = false;
-	//private String configfile = null;
-	//private String mapdir = null;
+	private static boolean isOpen = false;
 	private String persistenceUnit = null;
 	private String path_application = null;
 	
@@ -35,26 +33,34 @@ public class Connection implements IConnection
 	   //If the data source properties are changed the SessionFactory will
 	   //be rebuilt which is expensive.  This was implemented this way as
 	   //as an example of connecting data source properties to the open method.
+		//if(isOpen)
+			//return;
+		if(JPAUtil.isOpenConnection())
+			return;
 		
+		//if(JPAUtil.isEntityManagerFactoryValid())
+			//return;
 		try{
-			
-			//configfile = connProperties.getProperty( "JPACONFIG" );
-			//mapdir = connProperties.getProperty( "MAPDIR" );
-			//JPAUtil.constructSessionFactory( configfile, mapdir);
 			persistenceUnit=connProperties.getProperty( "PERSISTENCE_UNIT" );
-			path_application=connProperties.getProperty( "APP_JPA" );
+			path_application=connProperties.getProperty( "APP_JPA" )+"/";
+						
+			System.out.println("-  PersistenceUnit:"+path_application);
+			System.out.println("-  JPA Application Directory:"+path_application+"/");
 			JPAUtil.setApplication(path_application);
+			//if(JPAUtil.getApplication()!="")
 			JPAUtil.refreshURLs();
+			//if(!JPAUtil.isOpenConnection())
 			JPAUtil.constructEntityManagerFactory(persistenceUnit );
-			Object testSession = JPAUtil.currentSession();
-		
-			this.isOpen = true;
+			//Object testSession = JPAUtil.currentSession();
+		    JPAUtil.setConnection(this);
+			Connection.isOpen = true;
 		}catch(PersistenceException e){
 			throw new OdaException( e.getLocalizedMessage());
 		}catch(Exception e){
 			throw new OdaException( e.getLocalizedMessage());
 		}
 	}
+
 
 	/*
 	 * (non-Javadoc)
@@ -63,15 +69,16 @@ public class Connection implements IConnection
 	 */
 	public void close( ) throws OdaException
 	{
-		this.isOpen = false;
-		try{
+		//this.isOpen = false;
+		/*try{
 			JPAUtil.closeSession();
+			JPAUtil.closeFactory();
 		}catch(PersistenceException e){
 			throw new OdaException( e.getLocalizedMessage());
 		}
 		catch(Exception e){
 			throw new OdaException( e.getLocalizedMessage());
-		}
+		}*/
 
 	}
 
@@ -82,9 +89,11 @@ public class Connection implements IConnection
 	 */
 	public boolean isOpen( ) throws OdaException
 	{
-		return this.isOpen;
+		//return this.isOpen;
+		return Connection.isOpen;
 	}
 
+	
 	/*
 	 * (non-Javadoc)
 	 *
@@ -104,10 +113,15 @@ public class Connection implements IConnection
 	public IQuery newQuery( String dataSetType )
 			throws OdaException
 	{
-		if ( !isOpen( ) )
+		/*if ( !isOpen( ) )
+			throw new OdaException( Messages.getString("Common.CONNECTION_HAS_NOT_OPEN") );  //$NON-NLS-1$
+		*/
+		//return new Statement(this);
+		
+		if ( !JPAUtil.isOpenConnection())
 			throw new OdaException( Messages.getString("Common.CONNECTION_HAS_NOT_OPEN") );  //$NON-NLS-1$
 
-		return new Statement(this);
+		return new Statement(JPAUtil.getConnection());
 	}
 
 	/*

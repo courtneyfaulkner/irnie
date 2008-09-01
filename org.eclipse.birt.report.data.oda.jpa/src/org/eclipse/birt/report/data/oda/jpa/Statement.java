@@ -16,10 +16,11 @@ import org.eclipse.datatools.connectivity.oda.IResultSet;
 import org.eclipse.datatools.connectivity.oda.IResultSetMetaData;
 import org.eclipse.datatools.connectivity.oda.OdaException;
 import org.eclipse.datatools.connectivity.oda.SortSpec;
-//import org.hibernate.Session;
-//import org.hibernate.type.Type;
 import org.w3c.dom.Node;
+import java.net.URL;
+import java.net.URLClassLoader;
 
+import java.io.File;
 import java.math.BigDecimal;
 import java.sql.Date;
 import java.sql.Time;
@@ -72,22 +73,31 @@ public class Statement  implements IQuery
 		List<String> arColsName = new ArrayList<String>();	// holds the  column name
 	    List<String> arColEntity = new ArrayList<String>();	// holds the  column class
 	    	  	
-		
+				
 		try{
 			//reading all persistence.xml class Nodes 
 			String persist=JPAUtil.getApplication().concat(CommonConstant.PERSISTENCE_XML);
 			//List<Node> classNodes = JPAUtil.findNodeByName(CommonConstant.PERSISTENCE_XML, "class");
-			System.out.println("Persitence ok :"+persist);
 			List<Node> classNodes = JPAUtil.findNodeByName(persist, "class");
-			System.out.println("Obtuvo los nodos");
+			for(Node column : classNodes){
+				System.out.println("- "+column.getNodeName()+ "  "+column.getTextContent());				
+			}
+			
 			qry = qry.replaceAll("[\\n\\r]+"," ").trim();
 			
 			List<List<String>> columnList = new ArrayList<List<String>>();
+			System.out.println("Extracting Columns of Query");
 			columnList = extractColumns(qry);
-			
+			//System.out.println("Se extrejeron: " + columnList.size()+ " columnas");
+			System.out.println("Get Entities of Query");
 			List<List<String>> entityList = new ArrayList<List<String>>();
 			entityList = getReturnEntities(qry);
-			//NOTA: por ahora supongo que siempre habra columas en el SQL 
+			
+			//NOTA: por ahora supongo que siempre habra columas en el SQL
+					
+			//EntityManager e =(EntityManager) JPAUtil.currentSession();
+			//e.getTransaction().begin();
+			System.out.println("Extracting JPA Metadata");
 			for(List<String> column : columnList){
 				String entityName = "";
 				String entityAlias = column.get(0);
@@ -97,11 +107,13 @@ public class Statement  implements IQuery
 					if( entity.get(1).equals(entityAlias) )
 						entityName = entity.get(0);
 				}
-				//the entityNameLarge is used only for the Bean Introspection 
+				//the entityNameLarge is used only for the Bean Introspection
+				
 				String entityNameLarge = JPAUtil.findEntityOnPersistenceXML(entityName, classNodes);
 				String columnTypeLarge = JPAUtil.getFieldType( entityNameLarge, columnName );
 				String columnType = JPAUtil.prepareFieldType(columnTypeLarge);
 				//Verify that the data type is valid
+				//e.getTransaction().commit();
 				if( DataTypes.isValidType(columnType))
 				{
 					arColsType.add(columnType); 
@@ -111,6 +123,9 @@ public class Statement  implements IQuery
 					throw new OdaException( Messages.getString("Statement.SOURCE_DATA_ERROR") );
 				}
 			}//End "for" of column
+		}
+		catch(ClassNotFoundException e){
+			throw new OdaException( e.getLocalizedMessage() );
 		}catch(Exception e){
 			throw new OdaException( e.getLocalizedMessage() );
 		}			
@@ -153,6 +168,9 @@ public class Statement  implements IQuery
             	   List<String>column = new ArrayList<String>();
                    column.add( st2.nextToken() );
                    column.add( st2.nextToken() );
+                   for(String c:column){
+                	   System.out.println("Columna: "+c);
+                   }
                    columnList.add(column);
                }
                /*
@@ -193,7 +211,9 @@ public class Statement  implements IQuery
             	List<String> entity = new ArrayList<String>();
             	entity.add( st2.nextToken().trim() );
             	entity.add( st2.nextToken().trim() );
-            	
+            	/*for(String t: entity ){
+            		System.out.println("Entity: <<"+t+">>");
+            	}*/
             	entityList.add( entity );
             }
             /*
@@ -215,6 +235,7 @@ public class Statement  implements IQuery
 	 */
    	public IResultSet executeQuery( ) throws OdaException
 	{		
+   		System.out.println("********* Execute QUERY **********");
 		String[] qryReturnEntities = null;
 		List<String> rst = null;
 		try{
@@ -222,10 +243,16 @@ public class Statement  implements IQuery
 			qryStr = qryStr.replaceAll("[\\n\\r]+"," ");			
 			qryStr.trim();
 			EntityManager em = JPAUtil.currentSession();
+			//em.getTransaction().begin();
+			System.out.println("Creating... query");
 			Query qry = em.createQuery(qryStr) ;
 			//use the query list method to return the results in a List object
-			rst = (List<String>)qry.getResultList();	
-			
+			System.out.println("Executing query....");
+			rst = (List<String>)qry.getResultList();
+			//em.
+			//em.getTransaction().commit();
+			//em.close();
+			System.out.println("Getting Rows.... OK");				
 			List<List<String>> entitiesList = getReturnEntities(this.query);
 			List<String>list = new ArrayList<String>();
 			
@@ -237,7 +264,7 @@ public class Statement  implements IQuery
 		}catch(Exception e){
 			throw new OdaException( e.getLocalizedMessage() );
 		}
-		printResultSet( rst, qryReturnEntities );
+		//printResultSet( rst, qryReturnEntities );
 		//create a new ResultSet Object passing in the row set and the meta data and the
 		//query return entities
 		return new ResultSet( rst, getMetaData(), qryReturnEntities );
@@ -284,7 +311,7 @@ public class Statement  implements IQuery
 	 */
 	public void close( ) throws OdaException
 	{
-		connection = null;
+		//connection = null;
 		resultSetMetaData = null;
 		m_maxRows = 0;
 	}
@@ -295,7 +322,7 @@ public class Statement  implements IQuery
 	 */
 	public void setMaxRows( int max ) throws OdaException
 	{
-		throw new UnsupportedOperationException ();
+		//throw new UnsupportedOperationException ();
 	}
 	/*
 	 * (non-Javadoc)
@@ -586,7 +613,8 @@ public class Statement  implements IQuery
 	
 	private void testConnection( ) throws OdaException
 	{
-		if ( connection.isOpen( ) == false )
+		//if ( connection.isOpen( ) == false )
+		if ( JPAUtil.isOpenConnection() == false )
 			throw new OdaException( Messages.getString("Common.CONNECTION_HAS_NOT_OPEN") ); //$NON-NLS-1$
 	}
 	/*

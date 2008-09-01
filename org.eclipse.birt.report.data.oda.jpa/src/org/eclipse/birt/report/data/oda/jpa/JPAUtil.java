@@ -27,6 +27,11 @@ import javax.persistence.PersistenceException;
 //import javax.persistence.EntityExistException;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
+import org.w3c.dom.Document;
+import org.w3c.dom.NamedNodeMap;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
+
 import org.eclipse.datatools.connectivity.oda.OdaException;
 
 /*in Hibernate used something like: */
@@ -42,6 +47,7 @@ import org.w3c.dom.NodeList;
 import org.w3c.dom.Node;
 
 import org.osgi.framework.Bundle;
+import org.osgi.framework.BundleContext;
 //import org.eclipse.core.runtime.FileLocator;
 //import org.eclipse.core.runtime.Path;
 
@@ -54,9 +60,11 @@ import java.beans.PropertyDescriptor;
 public class JPAUtil {
 
 	private static EntityManagerFactory emf=null;
-	
+	//public static BundleContext context;
 	//private static String application="C:/App/Java/birt-runtime-2_3_0/ReportEngine/examplejpa/";
 	private static String application="";
+	private static ClassLoader testLoader;
+	private static Connection conn=null;
 	//private static Object configuration=null;
 
 	//private static String JPAConfigFile = "";
@@ -87,41 +95,28 @@ public class JPAUtil {
 			Thread thread = Thread.currentThread();
 			try{
 			
-				/*taked of Hibernate Plug-in*/	
-				//Class.forName("org.hibernate.Configuration");
-				//Configuration ffff = new Configuration();
-				//Class.forName("org.apache.commons.logging.LogFactory");
-
-				//oldloader = thread.getContextClassLoader();
-				//Class thwy = oldloader.loadClass("org.hibernate.cfg.Configuration");
-				//Class thwy2 = oldloader.loadClass("org.apache.commons.logging.LogFactory");
-				//refreshURLs();		
-				//ClassLoader changeLoader = new URLClassLoader( (URL [])URLList.toArray(new URL[0]),HibernateUtil.class.getClassLoader());
-				
-				ClassLoader testLoader = new URLClassLoader( (URL [])URLList.toArray(new URL[0]),pluginLoader);
+				//ClassLoader testLoader = new URLClassLoader( (URL [])URLList.toArray(new URL[0]),pluginLoader);
+				testLoader = new URLClassLoader( (URL [])URLList.toArray(new URL[0]),pluginLoader);
 				//changeLoader = new URLClassLoader( (URL [])URLList.toArray(new URL[0]));
 				/*Set the context with testLoader ClassLoader(a URLClassLoader)*/
 				thread.setContextClassLoader(testLoader);
 				//Bundle jpabundle = Platform.getBundle( "org.eclipse.birt.report.data.oda.jpa" );
-				/*In Hibernate Plug-in*/	
-				//Class thwy2 = changeLoader.loadClass("org.hibernate.cfg.Configuration");
-				//Class.forName("org.apache.commons.logging.LogFactory", true, changeLoader);
-				//Class cls = Class.forName("org.hibernate.cfg.Configuration", true, changeLoader);
-				//Configuration cfg=null;
-				//cfg = new Configuration();
-				//Object oo = cls.newInstance();
-				//Configuration cfg = (Configuration)oo;
-//				Configuration cfg = new Configuration();
-				//buildConfig(jpafile,mapdir, cfg);	
-				
-				//z/ buildConfig(persistenceUnit);	
 
-
-				Class driverClass = testLoader.loadClass("org.postgresql.Driver");
+				//Class driverClass = testLoader.loadClass("org.postgresql.Driver");
+				Class driverClass = testLoader.loadClass( getDriverValue() );
 				
+				System.out.println( "\nDriver used : " + getDriverValue()+"\n");
+				/*
+				Class e=testLoader.loadClass("Empleado");
+				Object emp=e.newInstance();
+				System.out.println("Emp: "+e);
+				testLoader.loadClass("Departamento");
+				*/
 				
+				//ClassLoader.getSystemClassLoader().//
 				Driver driver = (Driver) driverClass.newInstance( );
-				WrappedDriver wd = new WrappedDriver( driver,"org.postgresql.Driver");
+				//WrappedDriver wd = new WrappedDriver( driver,"org.postgresql.Driver");
+				WrappedDriver wd = new WrappedDriver( driver, getDriverValue() );
 
 				boolean foundDriver = false;
 				Enumeration drivers = DriverManager.getDrivers();
@@ -160,6 +155,7 @@ public class JPAUtil {
 				//thread.setContextClassLoader(oldloader);
 			}
 		}
+
 	}
 	
 	
@@ -174,7 +170,7 @@ public class JPAUtil {
 
 	public static synchronized void buildConfig(String persistenceUnit ) throws PersistenceException, IOException, Exception {
 		 
-		Bundle jpabundle = Platform.getBundle( "org.eclipse.birt.report.data.oda.jpa" );
+		//Bundle jpabundle = Platform.getBundle( "org.eclipse.birt.report.data.oda.jpa" );
 		
 		/*File cfgFile = new File(jpafile);
 		File cfgDir = new File(mapdir);
@@ -200,16 +196,18 @@ public class JPAUtil {
 	
 	public static void constructEntityManagerFactory(String persistenceUnit) throws PersistenceException {
 
-		/*if( jpafile == null){
-			jpafile = "";
+		System.out.println("Building EntityManagerFactory");
+		EntityManager s1 = (EntityManager) session.get();
+		if(s1!=null){
+			System.out.println("Yet exist Entity Manager");
+			if(s1.isOpen()){
+				System.out.println("Entity Manager yet have been active ");
+				s1.close();
+			}
 		}
-		if( mapdir == null){
-			mapdir = "";
-		} */
 		if( emf == null){
-			//initEntityManagerFactory( jpafile, mapdir);
+			System.out.println("Starting Entity Manager Factory");
 			initEntityManagerFactory( persistenceUnit);
-			System.out.println("Initing Entity Manager Factory");
 			return;
 		}
 
@@ -218,7 +216,8 @@ public class JPAUtil {
 		}*/
 		System.out.println( "Session Configuration Changed, rebuilding");
 		//Configuration changed need a rebuild.
-		//Note this is very expensive      
+		//Note this is very expensive 
+		
 		synchronized(emf) {
 			EntityManager s = (EntityManager) session.get();
 			if (s != null) {
@@ -253,6 +252,10 @@ public class JPAUtil {
 	
 	public static void closeFactory(){
 		//more error checking needed
+		/*EntityManager s=(EntityManager)session.get();
+		if(s!=null)
+			s.clear();*/
+		closeSession();
 		emf.close();
 		emf = null;
 	}
@@ -261,7 +264,8 @@ public class JPAUtil {
 	public static void closeSession() throws PersistenceException {
 		EntityManager s = (EntityManager) session.get();
 		if (s != null)
-			s.close();
+			if(s.isOpen())
+				s.close();
 		session.set(null);
 	}
 
@@ -350,15 +354,14 @@ public class JPAUtil {
 	{
 		Bundle jdbcbundle = Platform.getBundle( "org.eclipse.birt.report.data.oda.jdbc" );
 		Bundle jpabundle = Platform.getBundle( "org.eclipse.birt.report.data.oda.jpa" );
-		//Bundle tomcatPlgn = Platform.getBundle( "org.eclipse.tomcat" );
 		
+		//context =jpabundle.getBundleContext();
 		FileList.clear();
 		URLList.clear();
 		if ( jdbcbundle == null )
 			return;			// init failed
 
-		//jpabundle.getEntryPaths(arg0)
-		
+				
 		// List all files under "drivers" directory of the JDBC plugin
 		Enumeration files = jdbcbundle.getEntryPaths( 
 				OdaJdbcDriver.Constants.DRIVER_DIRECTORY );
@@ -388,27 +391,6 @@ public class JPAUtil {
 			}
 		}
 
-		
-		
-		
-		/*Enumeration tfiles = tomcatPlgn.getEntryPaths("/" );
-		while ( tfiles.hasMoreElements() )
-		{
-			String fileName = (String) tfiles.nextElement();
-			//if ( fileName.equals("commons-logging-api.jar") || fileName.equals("commons-collections.jar") ){
-			//	URL fileURL = tomcatPlgn.getEntry( fileName );
-			//	URLList.add(fileURL);				
-			//}
-				
-		}*/
-		
-//		URL jarURL = tomcatPlgn.getEntry( "commons-logging-api.jar" );
-//		System.out.println("Hibernate Plugin: Tomcat plugin: URL = " + jarURL );		
-//		URLList.add(jarURL);
-//		jarURL = tomcatPlgn.getEntry( "commons-collections.jar" );
-//		System.out.println("Hibernate Plugin: Tomcat plugin: URL = " + jarURL );		
-//		URLList.add(jarURL);		
-		
 		
 		// List all files under "jpaclassfiles" directory of this plugin
 		/*Enumeration jpaFiles = jpabundle.getEntryPaths( 
@@ -477,18 +459,22 @@ public class JPAUtil {
 		
 		
 		//URL fileMeta=jpabundle.getEntry(PU_meta);
-	try{
+	try{	
 		//String PU_meta="C:\\App\\Java\\birt-runtime-2_3_0\\ReportEngine\\plugins\\org.eclipse.birt.report.data.oda.jpa_2.0.0\\";
 		//String ejemplo="C:/App/Java/birt-runtime-2_3_0/ReportEngine/examplejpa/";
 		String ejemplo=JPAUtil.application;
-		//FileList.add(PU_meta);
-		FileList.add(ejemplo);
-		//File f=new File(PU_meta);
-		File f=new File(ejemplo);
-		URL fileMeta=f.toURI().toURL();
-		URLList.add(fileMeta);
-		//System.out.println("META: " + fileMeta.getPath());
-		System.out.println("APP: " + fileMeta.getPath());
+		
+		if(ejemplo!=""){
+			//FileList.add(PU_meta);
+			FileList.add(ejemplo);
+			//File f=new File(PU_meta);
+			File f=new File(ejemplo);
+			URL fileMeta=f.toURI().toURL();
+			URLList.add(fileMeta);
+			//System.out.println("META: " + fileMeta.getPath());
+			//System.out.println("APP: " + fileMeta.getPath());	
+		}
+		
 		
 		/*URL raiz=jpabundle.getEntry("/");
 		FileList.add("/");
@@ -498,16 +484,7 @@ public class JPAUtil {
 	}catch(Exception e){
 		System.out.println(e.getMessage());
 	}
-		//FileList.add("C:\App\Java\birt-runtime-2_3_0\ReportEngine\plugins\org.eclipse.birt.report.data.oda.jpa_2.0.0");
-		//FileList.add( CommonConstant.PERSISTENCE_XML );
-		//URL fileURL3 = jpabundle.getEntry( CommonConstant.PERSISTENCE_XML );
-		//URLList.add(fileURL3);
-		//System.out.println("Persistence.xml: add folder for standalone: " + 
-			//	CommonConstant.PERSISTENCE_XML  + ": URL=" + fileURL3 );
-		/*FileList.add( CommonConstant.JPA_CLASSES );
-		URL fileURL = jpabundle.getEntry( CommonConstant.JPA_CLASSES );
-		URLList.add(fileURL);
-		*/
+
 		//FileList.add( CommonConstant.JPA_CLASSES );
 		//Enumeration fileURL2 = jpabundle.getEntryPaths( CommonConstant.JPA_LIBS);
 		//URLList.add(fileURL2);
@@ -518,12 +495,12 @@ public class JPAUtil {
 				CommonConstant.JPA_LIBS + ": URL=" + fileURL2 );*/
 	
 		//Enumeration i=jpabundle.getEntryPaths("/");
-		System.out.println("****** FileList*********");
+		System.out.println("********* FileList************");
 		for(int i=0;i<FileList.size();i++){
 			System.out.println("File: "+FileList.get(i));
 		}
 		
-		System.out.println("\n****** URLList*********");
+		System.out.println("\n\n********** URLList*************");
 		for(int k=0;k<URLList.size();k++){
 			System.out.println("URL: "+URLList.get(k));
 		}
@@ -585,18 +562,26 @@ public class JPAUtil {
 	 */
 	public static String getFieldType(String bean, String fieldName)
 	throws OdaException
-	{	
+	{
 		String type = null;
-		
-		String[] fieldTypes = getFieldTypes(bean); 
-		String[] fieldNames = getFieldNames(bean);	
-		
-		for(int i = 0 ; i<fieldTypes.length ;i++)
-			if( fieldNames[i].compareTo(fieldName) == 0   )
-				type = fieldTypes[i];
-		if( type == null )
-			throw new OdaException( "FIELD NOT FOUND : "+fieldName+" not found in "+bean ); //$NON-NLS-1$
+		try{
 			
+			Class c=testLoader.loadClass(bean);
+			Object obj=c.newInstance();
+			String[] fieldTypes = getFieldTypes(bean);
+			String[] fieldNames = getFieldNames(bean);	
+			
+			for(int i = 0 ; i<fieldTypes.length ;i++)
+				if( fieldNames[i].compareTo(fieldName) == 0   )
+					type = fieldTypes[i];
+			if( type == null )
+				throw new OdaException( "FIELD NOT FOUND : "+fieldName+" not found in "+bean ); //$NON-NLS-1$
+			
+		}catch(/*ClassNotFound*/Exception e){
+			//throw new OdaException( "FIELD NOT FOUND : "+fieldName+" not found in "+bean ); //$NON-NLS-1$
+			//System.out.println("NO carga");
+			System.out.println(e.getMessage());
+		}
 		return type ;
 	}
 	/**
@@ -633,7 +618,8 @@ public class JPAUtil {
 	{
 		Class<?> cl = null;
 		try {
-			cl = Class.forName(className);
+			//cl = Class.forName(className);
+			cl = testLoader.loadClass(className);
 		} catch (ClassNotFoundException ex) {
 			ex.printStackTrace();
 		}
@@ -651,9 +637,8 @@ public class JPAUtil {
 	 
 	    List<Node> nodes = new ArrayList<Node>() ;
 	    // find all nodes
-	    System.out.println("Encontrando All Nodos");
 	    findAllNodes( doc.getChildNodes() , nodes );
-	    System.out.println("Encontró All Nodos");
+	    
 	    return nodes; 
 	}
 	/*
@@ -664,8 +649,10 @@ public class JPAUtil {
 			return;
 		for( int i = 0 ; i<childNodes.getLength() ; i++){
 			String nodeName = childNodes.item(i).getNodeName();
-			if( !nodeName.equals("#text") && !nodeName.equals("#comment"))
+			if( !nodeName.equals("#text") && !nodeName.equals("#comment")){
 				nodes.add( childNodes.item(i) );
+				//System.out.println("Nodo: " + childNodes.item(i).getNodeName()+", text= "+childNodes.item(i).getTextContent());
+			}
 			findAllNodes( childNodes.item(i).getChildNodes(), nodes );
 		}
 	}
@@ -677,14 +664,20 @@ public class JPAUtil {
 	{
 		List<Node> nodes = new ArrayList<Node>();
 		List<Node> temp = new ArrayList<Node>();
+		System.out.println("Parsing XML for find Nodes");
 		temp = scanPersistenceXML(pathPersistenceXML);
-		System.out.println("Escaneando XML");
+		
 		Iterator<Node> it = temp.iterator();
 		while(it.hasNext()){
 			Node node = it.next(); 
-			if( node.getNodeName().equals(nameNode) )
+			if( node.getNodeName().equals(nameNode) ){
+				//System.out.println("Nodo Encontrado:"+ node.getNodeName() );
+				//System.out.println("Nodo Encontrado:"+ node.getNodeName()+", text: "+node.getTextContent() );
 				nodes.add(node);
+			}
 		}
+		
+		
 		if( nodes.size()<=0 )
 			throw new OdaException( Messages.getString("JPAUtil.NODE_NOT_FOUND") );
 		
@@ -697,6 +690,7 @@ public class JPAUtil {
 	throws OdaException
 	{
 		String answer = null ;
+
 		for( Node node : classNodeList ){
 			String s = node.getTextContent();
 			StringTokenizer st = new StringTokenizer( s, ".");
@@ -733,4 +727,65 @@ public class JPAUtil {
 	public static String getApplication(){
 		return JPAUtil.application;
 	}
+	
+	/*
+	 * 
+	 */
+	private static String getDriverValue()
+	throws Exception
+	{
+		String driverValue = "";
+		String pathPersistnceXML = getApplication().concat(CommonConstant.PERSISTENCE_XML);
+		// building document
+		DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+	    DocumentBuilder        builder = factory.newDocumentBuilder();
+	    Document doc = builder.parse(pathPersistnceXML);
+		
+	    NodeList propertyNodes = doc.getElementsByTagName("property");
+	    
+	    for(int i = 0 ; i < propertyNodes.getLength() ; i++){
+	    	
+	    	Node node = propertyNodes.item(i);
+	    	NamedNodeMap nm = node.getAttributes();
+	    	Node att_name = nm.getNamedItem("name"); 
+	    		    	
+	    	if( att_name.getTextContent().endsWith("driver") )
+	    		driverValue = nm.getNamedItem("value").getTextContent();
+	    }
+	    
+	    return driverValue; 
+	 }
+
+	
+    public static void setConnection(Connection c){
+    	JPAUtil.conn=c;
+    }
+    public static Connection getConnection(){
+    	return JPAUtil.conn;
+    }
+    
+    public static boolean isOpenConnection(){
+    	if(conn==null)
+    		return false;
+    	try{
+    	 return conn.isOpen();
+    	}catch(Exception e){
+    		System.out.println(e.getMessage());
+    		//return false;
+    	}
+    	return false;
+    }
+    public static void closeConnection(){
+    	try{
+    		conn.close();
+    		//conn=null;
+    	}catch(Exception e){
+    		System.out.println(e.getMessage());
+    	}
+    	conn=null;
+    }
+    
+    /*public static void OpenConnection(){
+    	try
+    }*/
 }// END JPAUtil class 

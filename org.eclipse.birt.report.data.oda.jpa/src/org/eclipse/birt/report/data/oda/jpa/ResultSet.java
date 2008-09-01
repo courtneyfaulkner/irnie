@@ -48,6 +48,7 @@ public class ResultSet implements IResultSet
 	{
 		//Row Data
 		this.rowiter = rs.iterator();
+		
 		//Metadata
 		this.resultSetMetaData = rSMD;
 		//interp result set as Entity or Array
