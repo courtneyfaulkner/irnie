@@ -1,5 +1,13 @@
-package org.eclipse.birt.report.data.oda.jpa.ui;
+/**
+ * Implements the user interface that specifies data source properties. This 
+ * utility class specifies the page layout, sets up the controls that listen for user 
+ * input, verifies the location of the JPA Application Directory, and sets up 
+ * the name of Persistence Unit.    
+ * @author  Alfonso Phocco Diaz
+ * @version 1.0
+ */
 
+package org.eclipse.birt.report.data.oda.jpa.ui;
 
 import java.io.File;
 import java.nio.charset.Charset;
@@ -30,9 +38,6 @@ public class JpaPageHelper
     private WizardPage m_wizardPage;
     private PreferencePage m_propertyPage;
 
-    /*private transient Text m_mapLocation = null;
-    private transient Button m_browseMapButton = null;
-    */
     private transient Text m_jpaAppLocation = null;
     private transient Button m_browsejpaButton = null;
     
@@ -41,14 +46,7 @@ public class JpaPageHelper
     //private transient Text m_jpaConfig = null;
     //private transient Button m_browseJpaConfigButton = null;
     
-    
-    //private transient Button m_browseMapButton = null;
-
-    /*private transient Text m_configLocation = null;
-    private transient Button m_browseConfigButton = null;*/
-
     static final String DEFAULT_MESSAGE = "Select some existent PersitenceUnit JPA ";
-
     
     private static final int ERROR_FOLDER = 1;
     private static final int ERROR_EMPTY_PATH = 2;
@@ -70,33 +68,15 @@ public class JpaPageHelper
         GridLayout layout = new GridLayout( 3, false );
         content.setLayout(layout);
         
-        //GridData data;
-        //setupConfigLocation( content );
-        //setupMapLocation( content );
         setupJpaLocation( content );
         setupPU( content );
-        
-               
     }
-    
-    /*String getMapDir()
-    {
-        if( m_mapLocation == null )
-            return EMPTY_STRING;
-        return m_mapLocation.getText();
-    }*/
-
-    /*String getConfig()
-    {
-        if( m_configLocation == null )
-            return EMPTY_STRING;
-        return m_configLocation.getText();
-    }*/
 
     String getJpaDir()
     {
         if( m_jpaAppLocation == null )
             return EMPTY_STRING;
+        
         return m_jpaAppLocation.getText();
     }
 
@@ -116,12 +96,15 @@ public class JpaPageHelper
         
         // set custom driver specific properties
         //props.setProperty( "JPACONFIG", getConfig() );
-		props.setProperty( "APP_JPA", getJpaDir() );                            
+        String jpa_dir=getJpaDir();
+        //verifyPath(jpa_dir);	
+		props.setProperty( "APP_JPA", jpa_dir );                            
         props.setProperty( "PERSISTENCE_UNIT", getPU() );
 
         return props;
     }
     
+
     void initCustomControl( Properties profileProps )
     {
         setPageComplete( true );
@@ -131,6 +114,12 @@ public class JpaPageHelper
             m_PersistenceUnit == null || m_jpaAppLocation==null )
             return;     // nothing to initialize
         
+        /*Path of JPA Application*/
+        String appPath = profileProps.getProperty( "APP_JPA" );
+        if( appPath == null )
+            appPath = EMPTY_STRING;
+        //verifyPath(appPath);
+        m_jpaAppLocation.setText( appPath );
         
         /*Persistence Unit, where exists as entitites for report */
         String persistenceUnit = profileProps.getProperty( "PERSISTENCE_UNIT" );
@@ -138,11 +127,6 @@ public class JpaPageHelper
             persistenceUnit = EMPTY_STRING;
         m_PersistenceUnit.setText( persistenceUnit );
         
-        /*Path of JPA Application*/
-        String appPath = profileProps.getProperty( "APP_JPA" );
-        if( appPath == null )
-            appPath = EMPTY_STRING;
-        m_jpaAppLocation.setText( appPath );
            
         verifyConfigLocation();
     }
@@ -221,7 +205,9 @@ public class JpaPageHelper
     private int verifyConfigLocation()
     {
         int result = 0;
-        String persistence_xml=m_jpaAppLocation+"META-INF/persistence.xml";
+        //String persistence_xml=m_jpaAppLocation+"/META-INF/persistence.xml";
+        String persistence_xml=getJpaDir()+"/META-INF/persistence.xml";
+        //String persistence_xml=m_jpaAppLocation+"META-INF/persistence.xml";
         
         if( persistence_xml.trim().length() > 0 )
         {
@@ -240,7 +226,7 @@ public class JpaPageHelper
         }
         else
         {
-            setMessage( "No Configuration File Entered, Using default hibfiles directory", IMessageProvider.ERROR ); //$NON-NLS-1$
+            setMessage( "No Configuration File Entered, Using default JPA APP directory", IMessageProvider.ERROR ); //$NON-NLS-1$
             setPageComplete( true );
             result = ERROR_EMPTY_PATH;
         }

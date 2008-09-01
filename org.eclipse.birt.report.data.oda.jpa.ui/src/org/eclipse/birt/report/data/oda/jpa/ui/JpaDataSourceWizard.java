@@ -1,3 +1,11 @@
+/**
+ * Creates and initializes the controls for the data source wizard page, the class 
+ * sets the configuration file message and collects the property values.    
+ * @author  Alfonso Phocco Diaz
+ * @version 1.0
+ * @see     org.eclipse.datatools.connectivity.oda.design.ui.wizards.DataSourceWizardPage
+ */
+
 package org.eclipse.birt.report.data.oda.jpa.ui;
 
 import java.util.Properties;
@@ -13,12 +21,16 @@ public class JpaDataSourceWizard extends DataSourceWizardPage{
     private JpaPageHelper m_pageHelper;
     private Properties m_jpaProperties;
     
+    
+    /**
+     * Constructs a <code>JpaDataSourceWizard</code> with the page name
+     * @param   pageName   Page Name.
+     */
     public JpaDataSourceWizard( String pageName )
     {
         super( pageName );
-        setMessage( "Changing the configuration will cause a rebuilding of the JPA Session Factory \n It is advisable to set once for a system If left blank jpafiles directory will be used" );
- 
-    
+        setMessage( "Changing the configuration will cause a rebuilding of the JPA Session Factory \n It is advisable to set once for a system If left blank JPA directory will be used" );
+     
     }
 
 

@@ -15,7 +15,7 @@ public class Activator extends Plugin {
 	private static Activator plugin;
 	
 	/**
-	 * The constructor
+	 * The constructor <code>Activator</code>
 	 */
 	public Activator() {
 		plugin = this;

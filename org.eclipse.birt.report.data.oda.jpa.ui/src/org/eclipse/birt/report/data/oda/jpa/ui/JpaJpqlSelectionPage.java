@@ -2,7 +2,8 @@ package org.eclipse.birt.report.data.oda.jpa.ui;
 
 
 import java.io.File;
-
+import org.osgi.framework.Bundle;
+import org.osgi.framework.BundleContext;
 import org.eclipse.datatools.connectivity.oda.design.Properties;
 import org.eclipse.datatools.connectivity.oda.IQuery;
 import org.eclipse.datatools.connectivity.oda.OdaException;
@@ -43,13 +44,12 @@ import org.eclipse.birt.report.data.oda.jpa.*;
 public class JpaJpqlSelectionPage extends DataSetWizardPage 
 {
     private transient Text queryText = null;
-    
-
+    private static Connection connection;
+    private static boolean isOpen=false;
     //private transient DataSetHandle dataSetHandle = null;
     private transient Button queryButton = null;
     private boolean m_initialized = false;
     //private String  m_jpaconfig;
-    //private String m_mapdir;
     private String m_PersistenceUnit;//persistence unit name 
     private String m_jpaAppDir;// JPA Application Directory
 
@@ -72,8 +72,6 @@ public class JpaJpqlSelectionPage extends DataSetWizardPage
         super(pageName);
         setTitle(pageName);
         setMessage(DEFAULT_MESSAGE);
-
-        
     }
 
     
@@ -130,13 +128,9 @@ public class JpaJpqlSelectionPage extends DataSetWizardPage
 
     private void initializeControl()
     {
-    	
-    	
-        Properties dataSourceProps = getInitializationDesign().getDataSourceDesign().getPublicProperties();
-        
 
-        //m_hibconfig = dataSourceProps.getProperty("JPACONFIG" );
-        //m_mapdir = dataSourceProps.getProperty("MAPDIR" );
+    	Properties dataSourceProps = getInitializationDesign().getDataSourceDesign().getPublicProperties();
+        
         m_PersistenceUnit = dataSourceProps.getProperty("PERSISTENCE_UNIT" );
         m_jpaAppDir=dataSourceProps.getProperty("APP_JPA");
           	
@@ -205,7 +199,7 @@ public class JpaJpqlSelectionPage extends DataSetWizardPage
 		queryButton.setText(Messages.getString("wizard.title.verify"));//$NON-NLS-1$
 		//queryButton.setLayoutData(cBottom);
 
-		
+		//connection=new Connection();
 		// Add listener to the find button
 		queryButton.addSelectionListener(new SelectionAdapter() {
 		public void widgetSelected(SelectionEvent event) {
@@ -222,20 +216,33 @@ public class JpaJpqlSelectionPage extends DataSetWizardPage
 		setPageComplete( false );
 		queryButton.setEnabled(false);
     	//Makes a connection to the ODA runtime
-    	Connection conn = new Connection( );
+    	//Connection conn = new Connection( );
+		//Connection conn = connection;
 		
 		try
 		{
 	        java.util.Properties prop = new java.util.Properties();
-	        //if( m_hibconfig == null)m_hibconfig = "";
 	        if( m_PersistenceUnit == null)m_PersistenceUnit = "default";
 	        if( m_jpaAppDir == null)m_jpaAppDir = "";
 	        
 	        prop.put( "PERSISTENCE_UNIT", m_PersistenceUnit );
-	        prop.put( "APP_JPA", m_jpaAppDir );
-	        //prop.put( "MAPDIR", m_mapdir );			
-			        
-			conn.open( prop );
+	        prop.put( "APP_JPA", m_jpaAppDir);
+	        /*if(!isOpen){        
+	        	conn.open( prop );
+	        	isOpen=true;
+	        }*/
+	        //else
+	        	//conn= new Connection();
+	        Connection conn = null;
+			if(!JPAUtil.isOpenConnection()){
+				conn=new Connection();
+				conn.open(prop);
+			}
+			else
+				conn=JPAUtil.getConnection();
+			
+	        
+	        
 			IQuery query = conn.newQuery( "" );
 			//does not actually run the query, just uses Hibernate to prepare metadata
 			query.prepare( queryText.getText() );
@@ -274,9 +281,10 @@ public class JpaJpqlSelectionPage extends DataSetWizardPage
 			try
 			{
 				queryButton.setEnabled(true);
-				conn.close( );
+				//System.out.println("Close Verify");
+				//conn.close( );
 			}
-			catch ( OdaException e )
+			catch ( /*Oda*/Exception e )
 			{
 				System.out.println( e.getMessage());
 				setMessage( e.getLocalizedMessage( ), ERROR );
@@ -309,16 +317,29 @@ public class JpaJpqlSelectionPage extends DataSetWizardPage
     
     private void savePage( DataSetDesign dataSetDesign )
     {
-
-
-
         // obtain query's result set metadata, and update
         // the dataSetDesign with it
+    	//org.eclipse.birt.report.data.oda.jpa.Activator.getDefault().stop(JPAUtil.context);
+    	System.out.println("Saving page");
         IConnection conn = null;
         try
         {
             IDriver jpaDriver = new JPADriver();
-            conn = jpaDriver.getConnection( null );
+            //Connection conn = jpaDriver.getConnection( "");
+            /*if(isOpen)
+            	conn=connection;
+            else
+            	conn = jpaDriver.getConnection( "");
+            */
+            
+            //IConnection conn = null;
+            /*if(!JPAUtil.isOpenConnection()){
+				conn=jpaDriver.getConnection( "");
+				conn.open(prop);
+			}
+			else
+				conn=JPAUtil.getConnection();*/
+			
             IResultSetMetaData metadata = 
                 getResultSetMetaData( dataSetDesign.getQueryText(), conn );
             setResultSetMetaData( dataSetDesign, metadata );
@@ -330,7 +351,9 @@ public class JpaJpqlSelectionPage extends DataSetWizardPage
         }
         finally
         {
-            closeConnection( conn );
+        	//System.out.println("close save");
+            //closeConnection( conn );
+            
         }
         
         /*
@@ -351,10 +374,10 @@ public class JpaJpqlSelectionPage extends DataSetWizardPage
     {
         try
         {
-            if( conn != null )
-                conn.close();
+            if( conn != null );
+                //conn.close();
         }
-        catch( OdaException e )
+        catch( /*Oda*/Exception e )
         {
             // ignore
         }
@@ -367,19 +390,32 @@ public class JpaJpqlSelectionPage extends DataSetWizardPage
     {
  
         java.util.Properties prop = new java.util.Properties();
-        if( m_PersistenceUnit == null) m_PersistenceUnit = "";
-        //if( m_hibconfig == null)m_hibconfig = "";
-        //if( m_mapdir == null)m_mapdir = "";
-        //prop.put( "HIBCONFIG", m_hibconfig );
+        if( m_PersistenceUnit == null) m_PersistenceUnit = "default";
+        if( m_jpaAppDir == null) m_jpaAppDir = "";
+
         prop.put( "PERSISTENCE_UNIT", m_PersistenceUnit );			
-		        
+        prop.put( "APP_JPA", m_jpaAppDir);		        
         
-		conn.open( prop );
+        //System.out.println("Obteniendo ResulSetMEtadata y abriendo conexion");
+        
+        JPADriver jpaDriver=new JPADriver();
+        if(!JPAUtil.isOpenConnection()){
+			conn=jpaDriver.getConnection( "");
+			conn.open(prop);
+		}
+		else
+			conn=JPAUtil.getConnection();
+        
+        /*if(!isOpen){
+        	conn.open( prop );
+        	isOpen=true;
+        }*/
 		IQuery query = conn.newQuery( null );
 
 		//Do not need to run query just prepare it.
+		//System.out.println("Preparando Consulta");
 		query.prepare( queryText );
-	
+		//System.out.println("GEt Meta Data");
 
 		return query.getMetaData();
 	}    
@@ -394,14 +430,12 @@ public class JpaJpqlSelectionPage extends DataSetWizardPage
         
         resultSetDefn.setResultSetColumns( columns );
 
+		//System.out.println("ResulSetDefn Design SET");
         // no exception; go ahead and assign to specified dataSetDesign
         dataSetDesign.setPrimaryResultSet( resultSetDefn );
         dataSetDesign.getResultSets().setDerivedMetaData( true );
     }   
     
-
-
-
 }
 
 
