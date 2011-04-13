@@ -1,14 +1,22 @@
 package org.eclipse.birt.report.data.oda.jpa.ui;
 
 
-import java.io.File;
-import org.osgi.framework.Bundle;
-import org.osgi.framework.BundleContext;
-import org.eclipse.datatools.connectivity.oda.design.Properties;
+import org.eclipse.birt.report.data.oda.jpa.Connection;
+import org.eclipse.birt.report.data.oda.jpa.JPADriver;
+import org.eclipse.birt.report.data.oda.jpa.JPAUtil;
+import org.eclipse.datatools.connectivity.oda.IConnection;
+import org.eclipse.datatools.connectivity.oda.IDriver;
 import org.eclipse.datatools.connectivity.oda.IQuery;
+import org.eclipse.datatools.connectivity.oda.IResultSetMetaData;
 import org.eclipse.datatools.connectivity.oda.OdaException;
-
-
+import org.eclipse.datatools.connectivity.oda.design.DataSetDesign;
+import org.eclipse.datatools.connectivity.oda.design.DesignFactory;
+import org.eclipse.datatools.connectivity.oda.design.Properties;
+import org.eclipse.datatools.connectivity.oda.design.ResultSetColumns;
+import org.eclipse.datatools.connectivity.oda.design.ResultSetDefinition;
+import org.eclipse.datatools.connectivity.oda.design.ui.designsession.DesignSessionUtil;
+import org.eclipse.datatools.connectivity.oda.design.ui.wizards.DataSetWizardPage;
+import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
@@ -21,25 +29,7 @@ import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Label;
-import org.eclipse.swt.widgets.MessageBox;
 import org.eclipse.swt.widgets.Text;
-import org.eclipse.datatools.connectivity.oda.design.ui.wizards.DataSetWizardPage;
-import org.eclipse.jface.resource.ImageDescriptor;
-import org.eclipse.jface.viewers.ISelectionChangedListener;
-import org.eclipse.jface.viewers.SelectionChangedEvent;
-
-import org.eclipse.datatools.connectivity.oda.IConnection;
-import org.eclipse.datatools.connectivity.oda.IDriver;
-import org.eclipse.datatools.connectivity.oda.IQuery;
-
-import org.eclipse.datatools.connectivity.oda.design.DataSetDesign;
-import org.eclipse.datatools.connectivity.oda.design.ResultSetColumns;
-import org.eclipse.datatools.connectivity.oda.design.ResultSetDefinition;
-import org.eclipse.datatools.connectivity.oda.design.ui.designsession.DesignSessionUtil;
-import org.eclipse.datatools.connectivity.oda.IResultSetMetaData;
-import org.eclipse.datatools.connectivity.oda.design.DesignFactory;
-
-import org.eclipse.birt.report.data.oda.jpa.*;
 
 public class JpaJpqlSelectionPage extends DataSetWizardPage 
 {

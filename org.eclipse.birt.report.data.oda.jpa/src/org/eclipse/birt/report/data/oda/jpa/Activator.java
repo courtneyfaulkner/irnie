@@ -2,17 +2,17 @@ package org.eclipse.birt.report.data.oda.jpa;
 
 import java.net.URL;
 import java.net.URLClassLoader;
-import java.util.ArrayList;
-import org.eclipse.core.runtime.Plugin;
+
+import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.osgi.framework.BundleContext;
 
 /**
  * The activator class controls the plug-in life cycle
  */
-public class Activator extends Plugin {
+public class Activator extends AbstractUIPlugin {
 
 	// The plug-in ID
-	public static final String PLUGIN_ID = "org.eclipse.birt.report.data.oda.jpa";
+	public static final String PLUGIN_ID = "org.eclipse.birt.report.data.oda.jpa"; //$NON-NLS-1$
 
 	// The shared instance
 	private static Activator plugin;
@@ -21,15 +21,15 @@ public class Activator extends Plugin {
 	 * The constructor
 	 */
 	public Activator() {
-		plugin = this;
 	}
 
 	/*
 	 * (non-Javadoc)
-	 * @see org.eclipse.core.runtime.Plugins#start(org.osgi.framework.BundleContext)
+	 * @see org.eclipse.ui.plugin.AbstractUIPlugin#start(org.osgi.framework.BundleContext)
 	 */
 	public void start(BundleContext context) throws Exception {
 		super.start(context);
+		
 		Thread thread = Thread.currentThread();
 		ClassLoader oldloader = thread.getContextClassLoader();
 		
@@ -51,12 +51,13 @@ public class Activator extends Plugin {
 		
 		JPAUtil.changeLoader = changeLoader;
 		//JPAUtil.constructSessionFactory("", "");	
-				
+
+		plugin = this;
 	}
 
 	/*
 	 * (non-Javadoc)
-	 * @see org.eclipse.core.runtime.Plugin#stop(org.osgi.framework.BundleContext)
+	 * @see org.eclipse.ui.plugin.AbstractUIPlugin#stop(org.osgi.framework.BundleContext)
 	 */
 	public void stop(BundleContext context) throws Exception {
 		plugin = null;

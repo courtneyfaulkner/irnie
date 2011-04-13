@@ -1,7 +1,3 @@
-/**
- * @(#)Statement.java
- */
-
 package org.eclipse.birt.report.data.oda.jpa;
 
 import org.eclipse.birt.report.data.oda.jpa.DataTypes;
@@ -38,7 +34,7 @@ import javax.persistence.Query;
 
 	
 
-public class Statement  implements IQuery
+public class Statement implements IQuery
 {
 	
 	private IConnection connection = null;

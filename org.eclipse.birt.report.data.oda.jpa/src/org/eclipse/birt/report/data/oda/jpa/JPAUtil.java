@@ -1,6 +1,11 @@
 package org.eclipse.birt.report.data.oda.jpa;
 
-import java.io.*;
+import java.beans.BeanInfo;
+import java.beans.IntrospectionException;
+import java.beans.Introspector;
+import java.beans.PropertyDescriptor;
+import java.io.File;
+import java.io.IOException;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.sql.Driver;
@@ -11,51 +16,24 @@ import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.Iterator;
 import java.util.List;
-//import java.util.Map;
 import java.util.Properties;
 import java.util.StringTokenizer;
-
-import org.eclipse.birt.report.data.oda.jdbc.OdaJdbcDriver;
-import org.eclipse.core.runtime.Platform;
 
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.Persistence;
-//import javax.persistence.PersistenceContext;
 import javax.persistence.PersistenceException;
-//import javax.persistence.EntityNotFoundException;
-//import javax.persistence.EntityExistException;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
+
+import org.eclipse.birt.report.data.oda.jdbc.OdaJdbcDriver;
+import org.eclipse.core.runtime.Platform;
+import org.eclipse.datatools.connectivity.oda.OdaException;
+import org.osgi.framework.Bundle;
 import org.w3c.dom.Document;
 import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
-
-import org.eclipse.datatools.connectivity.oda.OdaException;
-
-/*in Hibernate used something like: */
-/*
-import org.hibernate.HibernateException;
-import org.hibernate.Session;
-import org.hibernate.SessionFactory;
-import org.hibernate.cfg.Configuration;
-import org.hibernate.EntityMode;
-*/
-import org.w3c.dom.Document;
-import org.w3c.dom.NodeList;
-import org.w3c.dom.Node;
-
-import org.osgi.framework.Bundle;
-import org.osgi.framework.BundleContext;
-//import org.eclipse.core.runtime.FileLocator;
-//import org.eclipse.core.runtime.Path;
-
-/*Used for extract Metadata of JPA entities using Reflection*/
-import java.beans.BeanInfo;
-import java.beans.IntrospectionException;
-import java.beans.Introspector;
-import java.beans.PropertyDescriptor;
 
 public class JPAUtil {
 
